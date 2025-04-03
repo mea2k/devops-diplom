@@ -59,7 +59,10 @@ module "cluster-infrastructure" {
   
   ## List of Worker subnets Ids
   ## (count must be equal to 'var.vm_worker_count')
-  vm_worker_subnets = concat([{id=module.net.private[0].id, zone=module.net.private[0].zone}], [for s in module.net.private : {id=s.id, zone=s.zone}])
+  vm_worker_subnets = concat(
+    [{id=module.net.private[0].id, zone=module.net.private[0].zone}], 
+    [for s in module.net.private : {id=s.id, zone=s.zone}]
+  )
   
   ## VMs resources - use default
   vms_resources = {
@@ -109,7 +112,7 @@ module "cluster-infrastructure" {
   ## ssh root-key
   vms_ssh_root_key = var.vms_ssh_root_key
 
-  # запуск после создания сетей (modele.net)
+  # запуск после создания сетей (module.net)
   depends_on = [ module.net ]
 }
 
