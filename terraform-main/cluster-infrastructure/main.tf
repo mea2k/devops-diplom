@@ -3,7 +3,7 @@
 #######################################
 ## Образ загрузочного диска
 data "yandex_compute_image" "boot" {
-  family    = var.vms_os_family
+  family = var.vms_os_family
 }
 ## Описание ВМ Master - VM_MASTER_COUNT штук типа "master" (см. var.vms_resources)
 resource "yandex_compute_instance" "vm_master" {
@@ -43,7 +43,7 @@ resource "yandex_compute_instance" "vm_master" {
   # разрешение обновления ВМ "на лету"
   allow_stopping_for_update = true
   #######################################
-  
+
   # metadata = {
   #   serial-port-enable = local.vms_metadata.serial_port_enable #1
   #   ssh-keys           = local.vms_metadata.ssh_keys[0]        #"ubuntu:${var.vms_ssh_root_key}"
@@ -98,4 +98,19 @@ resource "yandex_compute_instance" "vm_worker" {
   #   ssh-keys           = local.vms_metadata.ssh_keys[0]        #"ubuntu:${var.vms_ssh_root_key}"
   # }
   metadata = local.vms_metadata_public_image
+}
+
+#######################################
+# ФАЙЛ HOSTS.YAML ДЛЯ ANSIBLE
+#######################################
+## generate inventory file for Ansible
+resource "local_file" "ansible_hosts" {
+  content = templatefile("${path.module}/templates/hosts.tpl",
+    {
+      vm_master = yandex_compute_instance.vm_master
+      vm_worker = yandex_compute_instance.vm_worker
+      ansible_user : var.vms_ssh_user
+    }
+  )
+  filename = "${var.ansible_inventory_path}hosts.yml"
 }

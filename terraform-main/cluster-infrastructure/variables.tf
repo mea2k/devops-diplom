@@ -27,7 +27,7 @@ variable "vm_worker_name" {
 }
 ## List of Master subnets Ids
 variable "vm_master_subnets" {
-  type        = list(object({
+  type = list(object({
     id : string,
     zone : string
   }))
@@ -35,7 +35,7 @@ variable "vm_master_subnets" {
 }
 ## List of Worker subnets Ids
 variable "vm_worker_subnets" {
-  type        = list(object({
+  type = list(object({
     id : string,
     zone : string
   }))
@@ -108,6 +108,15 @@ variable "vm_nat_os_family" {
   default     = "nat-instance-ubuntu"
 }
 
+#######################################
+# ANSIBLE INVENTORY VARS
+#######################################
+## Ansible inventory relative path
+variable "ansible_inventory_path" {
+  type        = string
+  description = "Ansible inventory relative path (ended with '/')"
+  default     = "./"
+}
 
 
 #######################################
