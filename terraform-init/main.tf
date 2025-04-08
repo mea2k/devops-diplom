@@ -1,4 +1,20 @@
 #######################################
+# НАСТРОЙКИ ОРГАНИЗАЦИИ ДЛЯ РАБОТЫ OS LOGIN
+#######################################
+## Настройки OS Login
+resource "yandex_organizationmanager_os_login_settings" "my_os_login_settings" {
+  organization_id = var.organization_id
+  ssh_certificate_settings {
+    enabled = true
+  }
+  user_ssh_key_settings {
+    enabled               = true
+    allow_manage_own_keys = true
+  }
+}
+
+
+#######################################
 # СЕРВИСНЫЙ АККАУНТ ДЛЯ TERRAFORM
 #######################################
 ## Сервисный аккаунт Terraform
@@ -25,6 +41,21 @@ resource "yandex_resourcemanager_folder_iam_member" "encrypterDecrypter" {
   role      = "kms.keys.encrypterDecrypter"
   member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
+## Предоставление роли compute.osLogin на текущий folder
+## для возможности подключения к ВМ через OS Login
+resource "yandex_resourcemanager_folder_iam_member" "osLogin" {
+  folder_id = var.folder_id
+  role      = "compute.osLogin"
+  member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
+}
+## Предоставление роли compute.operator на текущий folder
+## для возможности подключения к ВМ через OS Login
+resource "yandex_resourcemanager_folder_iam_member" "operator" {
+  folder_id = var.folder_id
+  role      = "compute.operator"
+  member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
+}
+
 
 #######################################
 # BUCKET И КЛЮЧИ ШИФРОВАНИЯ
@@ -92,16 +123,16 @@ resource "yandex_storage_bucket" "tfstate-bucket" {
 resource "local_file" "vars" {
   content = templatefile("${path.module}/templates/variables.tpl",
     {
-      bucket: {
-        name: yandex_storage_bucket.tfstate-bucket.bucket,
-		    bucket_domain_name: yandex_storage_bucket.tfstate-bucket.bucket_domain_name,
-		    id: yandex_storage_bucket.tfstate-bucket.id,
-        region: var.default_zone,
-        key: var.tfstate_bucket_key
-	    }
-      access_key: yandex_iam_service_account_static_access_key.sa-static-key.access_key
-      secret_key: yandex_iam_service_account_static_access_key.sa-static-key.secret_key
-    } 
+      bucket : {
+        name : yandex_storage_bucket.tfstate-bucket.bucket,
+        bucket_domain_name : yandex_storage_bucket.tfstate-bucket.bucket_domain_name,
+        id : yandex_storage_bucket.tfstate-bucket.id,
+        region : var.default_zone,
+        key : var.tfstate_bucket_key
+      }
+      access_key : yandex_iam_service_account_static_access_key.sa-static-key.access_key
+      secret_key : yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+    }
   )
   filename = "${var.terraform_main_path}${var.terraform_main_secret_vars_filename}"
   # зависимости
