@@ -13,7 +13,6 @@ resource "yandex_organizationmanager_os_login_settings" "my_os_login_settings" {
   }
 }
 
-
 #######################################
 # СЕРВИСНЫЙ АККАУНТ ДЛЯ TERRAFORM
 #######################################
@@ -55,7 +54,6 @@ resource "yandex_resourcemanager_folder_iam_member" "operator" {
   role      = "compute.operator"
   member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
-
 
 #######################################
 # BUCKET И КЛЮЧИ ШИФРОВАНИЯ
@@ -114,7 +112,6 @@ resource "yandex_storage_bucket" "tfstate-bucket" {
   ]
 }
 
-
 #######################################
 # НАСТРОЙКА S3 BACKEND ДЛЯ TERRAFORM-MAIN
 # СОЗДАЕМ BACKEND.SECRET.TFVARS
@@ -166,7 +163,6 @@ resource "local_file" "vars" {
 #     yandex_storage_bucket.tfstate-bucket
 #   ]
 # }
-
 
 
 # resource "null_resource" "example" {
