@@ -5,13 +5,13 @@
 variable "cloud_id" {
   type        = string
   description = "https://cloud.yandex.ru/docs/resource-manager/operations/cloud/get-id"
-  sensitive = true
+  sensitive   = true
 }
 ## cloud-folder id
 variable "folder_id" {
   type        = string
   description = "https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id"
-  sensitive = true
+  sensitive   = true
 }
 
 #######################################
@@ -77,6 +77,81 @@ variable "subnet_private_cidr" {
 }
 
 
+#######################################
+# VMs RESOURCES
+#######################################
+## VMs resources
+variable "vms_resources" {
+  type = map(object({
+    platform_id : string,
+    cores : number,
+    memory : number,
+    core_fraction : number,
+    preemptible : bool,
+    hdd_size : number,
+    hdd_type : string,
+    enable_nat : bool,
+    ip_address : string,
+  }))
+  description = "{platform_id=<STRING>, cores=<NUMBER>, memory=<NUMBER>, core_fraction=<NUMBER>, vm_db_preemptible: <BOOL>, hdd_size=<NUMBER>, hdd_type=<STRING>, enable_nat: <BOOL>}"
+  default = {
+    "server" = {
+      platform_id   = "standard-v3"
+      cores         = 2
+      memory        = 1
+      core_fraction = 20
+      preemptible   = true
+      hdd_size      = 10
+      hdd_type      = "network-hdd"
+      enable_nat    = true,
+      ip_address    = ""
+    },
+    "master" = {
+      platform_id   = "standard-v3"
+      cores         = 2
+      memory        = 2
+      core_fraction = 20
+      preemptible   = true
+      hdd_size      = 30
+      hdd_type      = "network-hdd"
+      enable_nat    = true,
+      ip_address    = ""
+    },
+    "worker" = {
+      platform_id   = "standard-v3"
+      cores         = 2
+      memory        = 2
+      core_fraction = 20
+      preemptible   = true
+      hdd_size      = 20
+      hdd_type      = "network-hdd"
+      enable_nat    = false,
+      ip_address    = ""
+    },
+    "nat" = {
+      platform_id   = "standard-v3"
+      cores         = 2
+      memory        = 1
+      core_fraction = 20
+      preemptible   = true
+      hdd_size      = 10
+      hdd_type      = "network-hdd"
+      enable_nat    = true
+      ip_address    = ""
+    },
+    "control" = {
+      platform_id   = "standard-v3"
+      cores         = 2
+      memory        = 2
+      core_fraction = 20
+      preemptible   = true
+      hdd_size      = 30
+      hdd_type      = "network-hdd"
+      enable_nat    = true
+      ip_address    = ""
+    },
+  }
+}
 
 
 #######################################
