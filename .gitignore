@@ -53,6 +53,7 @@ user-data
 */.ssh
 *.pub
 **/*.pub
+keys
 
 #authorized keys
 *authorized_key.json

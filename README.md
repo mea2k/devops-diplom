@@ -38,3 +38,26 @@
 	```
 	terraform -chdir=./terraform-main apply -var-file=../secret.auto.tfvars
 	```
+
+
+
+
+
+
+------
+
+## Полезные дополнительные материалы, которые пригодились для выполнения задания
+
+
+[Установка kubernetes через kubespray - habr](https://habr.com/ru/articles/426959/)
+
+[https://dev.to/admantium/kubernetes-installation-tutorial-kubespray-46ek?ysclid=m97m4b14sh390719292](https://dev.to/admantium/kubernetes-installation-tutorial-kubespray-46ek?ysclid=m97m4b14sh390719292)
+
+[https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec](https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec)
+
+
+------ 
+
+# Задание
+
+[https://github.com/netology-code/devops-diplom-yandexcloud](https://github.com/netology-code/devops-diplom-yandexcloud)
