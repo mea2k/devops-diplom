@@ -54,6 +54,13 @@ resource "yandex_resourcemanager_folder_iam_member" "operator" {
   role      = "compute.operator"
   member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
+## Предоставление роли load-balancer.admin на текущий folder
+## для возможности создавать внешние балансировщики (NLB)
+resource "yandex_resourcemanager_folder_iam_member" "loadBalancerAdmin" {
+  folder_id = var.folder_id
+  role      = "load-balancer.admin"
+  member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
+}
 
 #######################################
 # BUCKET И КЛЮЧИ ШИФРОВАНИЯ
@@ -140,7 +147,7 @@ resource "local_file" "vars" {
   ]
 }
 
-## СОздаем файл backend.tf
+## Создаем файл backend.tf
 # resource "local_file" "backend" {
 #   content = templatefile("${path.module}/templates/backend.tpl",
 #     {

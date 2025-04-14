@@ -3,9 +3,9 @@ terraform {
       endpoints = {
         s3 = "https://storage.yandexcloud.net"
       }
-      bucket = "${bucket.name}"
-      region = "${bucket.region}"
-      key    = "${bucket.key}"
+      bucket     = "${bucket.name}"
+      region     = "${bucket.region}"
+      key        = "${bucket.key}"
       access_key = "${access_key}"
       secret_key = "${secret_key}"
 
