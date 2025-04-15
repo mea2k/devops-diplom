@@ -13,6 +13,4 @@ locals {
   vms_metadata_public_image = {
     "user-data" : "#cloud-config\nusers:\n  - name: ${var.vms_ssh_user}\n    groups: sudo\n    shell: /bin/bash\n    sudo: 'ALL=(ALL) NOPASSWD:ALL'\n    ssh_authorized_keys:\n      - ${var.vms_ssh_root_key}"
   }
-
-
 }

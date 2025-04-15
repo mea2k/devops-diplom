@@ -61,16 +61,6 @@ variable "vms_resources" {
 }
 
 #######################################
-# KUBESPRAY VARS
-#######################################
-## Kubespray Ansible inventory relative path
-variable "ansible_host_file" {
-  type        = string
-  description = "Ansible inventory relative path (ended with '/')"
-  default     = "./hosts.yml"
-}
-
-#######################################
 # SSH vars
 #######################################
 ## ssh user

@@ -7,7 +7,8 @@ data "yandex_compute_image" "vm_boot" {
 
   family = var.vm_control_os_family
 }
-## VM-ONTROL
+
+## VM-CONTROL
 resource "yandex_compute_instance" "vm_control" {
   count = var.vm_control_enable == true ? 1 : 0
 
@@ -52,6 +53,8 @@ resource "yandex_compute_instance" "vm_control" {
 #######################################
 ## Установка необходимых зависимостей
 resource "terraform_data" "install_common" {
+  count = var.vm_control_enable == true ? 1 : 0
+
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get -y update",
@@ -70,10 +73,11 @@ resource "terraform_data" "install_common" {
 
 ## Установка ANSIBLE
 resource "terraform_data" "install_ansible" {
+  count = var.vm_control_enable == true ? 1 : 0
+
   provisioner "remote-exec" {
     inline = [
       "sudo add-apt-repository --yes --update ppa:ansible/ansible",
-      #"sudo apt install -y ansible --reinstall ",  # will install during pip indtall -r requirements.txt
     ]
     connection {
       type        = "ssh"
@@ -87,6 +91,8 @@ resource "terraform_data" "install_ansible" {
 
 ## Установка Kubectl
 resource "terraform_data" "install_kubectl" {
+  count = var.vm_control_enable == true ? 1 : 0
+
   provisioner "remote-exec" {
     inline = [
       "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl",
@@ -102,41 +108,9 @@ resource "terraform_data" "install_kubectl" {
   depends_on = [terraform_data.install_ansible]
 }
 
-## Установка Kubespray
-resource "terraform_data" "install_kubespray" {
-  provisioner "remote-exec" {
-    inline = [
-      "#!/bin/bash",
-      "git-force-clone -b master https://github.com/kubernetes-incubator/kubespray.git kubespray",
-      "python3 -m venv kubespray-venv",
-      "source kubespray-venv/bin/activate",
-      "cd kubespray",
-      "pip install -U -r requirements.txt"
-    ]
-    connection {
-      type        = "ssh"
-      host        = yandex_compute_instance.vm_control[0].network_interface[0].nat_ip_address
-      user        = var.vms_ssh_user
-      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
-    }
-  }
-  depends_on = [terraform_data.install_ansible]
-}
-
 ## Копирование файлов на VM-CONTROLLER
-resource "terraform_data" "kubespray_config3" {
-  ## Копирование файла hosts.yml,
-  ## созданного автоматически модулем 'cluster-infrastructure'
-  provisioner "file" {
-    source      = var.ansible_host_file
-    destination = "kubespray/inventory/hosts.yml"
-    connection {
-      type        = "ssh"
-      host        = yandex_compute_instance.vm_control[0].network_interface[0].nat_ip_address
-      user        = var.vms_ssh_user
-      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
-    }
-  }
+resource "terraform_data" "ssh_config" {
+  count = var.vm_control_enable == true ? 1 : 0
 
   ## Копирование файла приватного ключа для SSH
   provisioner "file" {
@@ -164,27 +138,5 @@ resource "terraform_data" "kubespray_config3" {
       private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
     }
   }
-
-  depends_on = [terraform_data.install_kubespray]
-
-}
-
-## Установка Kubernetes
-resource "terraform_data" "kubespray_install" {
-  provisioner "remote-exec" {
-    inline = [
-      "#!/bin/bash",
-      "python3 -m venv kubespray-venv",
-      "source kubespray-venv/bin/activate",
-      "cd kubespray",
-      "ansible-playbook -i inventory/hosts.yml --private-key=~/.ssh/${var.ssh_private_key_file} -u ${var.vms_ssh_user} -b -v cluster.yml"
-    ]
-    connection {
-      type        = "ssh"
-      host        = yandex_compute_instance.vm_control[0].network_interface[0].nat_ip_address
-      user        = var.vms_ssh_user
-      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
-    }
-  }
-  depends_on = [terraform_data.kubespray_config3]
+  depends_on = [terraform_data.install_common]
 }
