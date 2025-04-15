@@ -14,5 +14,12 @@ locals {
     "user-data" : "#cloud-config\nusers:\n  - name: ${var.vms_ssh_user}\n    groups: sudo\n    shell: /bin/bash\n    sudo: 'ALL=(ALL) NOPASSWD:ALL'\n    ssh_authorized_keys:\n      - ${var.vms_ssh_root_key}"
   }
 
-
+  master_ssh = [
+    for idx, s in yandex_compute_instance.vm_master : {
+      name : s.name,
+      ip : s.network_interface[0].ip_address,
+      nat_ip : var.ssh_master_forward_enable == true ? var.vm_nat[s.zone].nat_ip : (s.network_interface[0].nat_ip_address != "" ? s.network_interface[0].nat_ip_address : s.network_interface[0].ip_address),
+      nat_port : var.ssh_master_forward_enable == true ? var.ssh_nat_port + idx : 22,
+    }
+  ]
 }

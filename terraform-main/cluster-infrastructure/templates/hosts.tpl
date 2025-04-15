@@ -4,8 +4,7 @@ all:
 %{ for vm in vm_master ~}
     ${vm.name}:
       ansible_host: ${vm.network_interface[0].ip_address}
-      ip: ${vm.network_interface[0].ip_address}
-      access_ip: ${vm.network_interface[0].nat_ip_address}
+      access_ip: ${vm.network_interface[0].ip_address}
 %{ endfor ~}
 %{ for vm in vm_worker ~}
     ${vm.name}:

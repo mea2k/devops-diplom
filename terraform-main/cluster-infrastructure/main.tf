@@ -34,6 +34,7 @@ resource "yandex_compute_instance" "vm_master" {
     preemptible = var.vms_resources["master"].preemptible
   }
   network_interface {
+    index     = 0
     subnet_id = var.vm_master_subnets[count.index].id
     nat       = var.vms_resources["master"].enable_nat
   }
@@ -83,6 +84,7 @@ resource "yandex_compute_instance" "vm_worker" {
     preemptible = var.vms_resources["worker"].preemptible
   }
   network_interface {
+    index     = 0
     subnet_id = var.vm_worker_subnets[count.index].id
     nat       = var.vms_resources["worker"].enable_nat
   }
@@ -113,4 +115,31 @@ resource "local_file" "ansible_hosts" {
     }
   )
   filename = "${var.ansible_inventory_path}hosts.yml"
+}
+
+#######################################
+# ПРОБРОС ПОРТОВ ДЛЯ SSH
+#######################################
+## Установка правил IPTABLES на всех NAT-INSTANCES
+## Внешний порт - начиная с VAR.EXT_SSH_PORT и далее + 1
+## если ssh_master_forward_enable стоит TRUE
+resource "terraform_data" "iptables_rules" {
+  count = var.ssh_master_forward_enable == true ? var.vm_master_count : 0
+
+  provisioner "remote-exec" {
+    inline = [
+      "#!/bin/bash",
+      "sudo apt install -y iptables iptables-persistent",
+      "sudo iptables -t nat -F PREROUTING",
+      "sudo iptables -t nat -A PREROUTING -p tcp --dport ${local.master_ssh[count.index].nat_port} -j DNAT --to-destination ${local.master_ssh[count.index].ip}:22",
+      "sudo iptables-save | sudo tee /etc/iptables/rules.v4",
+    ]
+    connection {
+      type        = "ssh"
+      host        = local.master_ssh[count.index].nat_ip
+      user        = var.vms_ssh_user
+      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
+    }
+  }
+  depends_on = [yandex_compute_instance.vm_master]
 }

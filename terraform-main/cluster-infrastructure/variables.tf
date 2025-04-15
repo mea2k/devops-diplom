@@ -102,10 +102,18 @@ variable "vms_os_family" {
   default     = "ubuntu-2404-lts-oslogin"
 }
 
-variable "vm_nat_os_family" {
-  type        = string
-  description = "OS family for NAT from Yandex.CLoud ('yc compute image list --folder-id standard-images')"
-  default     = "nat-instance-ubuntu"
+## VM NAT-instances info
+variable "vm_nat" {
+  type = map(object({
+    name : string,
+    zone : string,
+    network_id : string,
+    id : string,
+    ip : string,
+    nat_ip : string,
+    fqdn : string,
+  }))
+  description = "VM NAT-INSTANCES info (uses in making ssh forwarding, gets from module 'network-infrustructure')"
 }
 
 #######################################
@@ -118,10 +126,22 @@ variable "ansible_inventory_path" {
   default     = "./"
 }
 
-
 #######################################
 # SSH vars
 #######################################
+## Enable ssh forwarding via VM-control
+variable "ssh_master_forward_enable" {
+  type        = bool
+  description = "Enable ssh forwarding via VM-control"
+  default     = false
+}
+## External SSH PORT for VM Masters (start from)
+variable "ssh_nat_port" {
+  type        = number
+  description = "External SSH PORT for VM Masters (start from) - actual if ssh_forward_enable is 'true'"
+  default     = 22000
+}
+
 ## ssh user
 variable "vms_ssh_user" {
   type        = string
@@ -132,4 +152,17 @@ variable "vms_ssh_user" {
 variable "vms_ssh_root_key" {
   type        = string
   description = "ssh-keygen -t ed25519"
+}
+## ssh private key path
+## (without last '/')
+variable "ssh_private_key_path" {
+  type        = string
+  description = "## ssh private key path (without last '/') (default - './.ssh')"
+  default     = "./.ssh"
+}
+## ssh private key filename
+variable "ssh_private_key_file" {
+  type        = string
+  description = "## ssh private key filename (default - 'id_rsa')"
+  default     = "id_rsa"
 }
