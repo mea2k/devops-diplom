@@ -59,9 +59,12 @@ variable "subnet_public_name" {
 }
 ## default PUBLIC net cidr
 variable "subnet_public_cidr" {
-  type        = list(string)
-  description = "VPC public cidr (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = ["10.1.1.0/24"]
+  type = list(object({
+    zone : string,
+    cidr : list(string)
+  }))
+  description = "VPC public cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
+  default     = [{ zone : "ru-central1-a", cidr : ["10.1.1.0/24"] }]
 }
 ## default PRIVATE net name
 variable "subnet_private_name" {
@@ -71,11 +74,51 @@ variable "subnet_private_name" {
 }
 ## default PRIVATE net cidr
 variable "subnet_private_cidr" {
-  type        = list(string)
-  description = "VPC private cidr (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = ["10.2.1.0/24"]
+  type = list(object({
+    zone : string,
+    cidr : list(string)
+  }))
+  description = "VPC private cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
+  default     = [{ zone : "ru-central1-a", cidr : ["192.168.1.0/24"] }]
 }
 
+#######################################
+# KUBERNETES CONFIG VARS
+#######################################
+## Virtual IP for check group
+variable "loadbalancer_ext_ip" {
+  type        = string
+  description = "Virtual IP for check group"
+  default     = null
+}
+## Virtual Port for check group
+variable "loadbalancer_ext_port" {
+  type        = number
+  description = "Virtual Port for check group (default - 8888)"
+  default     = 8888
+}
+## Inner Port for check group
+variable "loadbalancer_int_port" {
+  type        = number
+  description = "Inner Port for check group (default - 6443)"
+  default     = 6443
+}
+## Proxy liveness healthcheck port (for nginx)
+variable "loadbalancer_healthcheck_port" {
+  type        = number
+  description = "Proxy liveness healthcheck port (for nginx)"
+  default     = 8081
+}
+
+#######################################
+# YANDEX APPLICATION LOAD BALANCER (ALB)
+#######################################
+## ALB External Ports for listenning (list)
+variable "app_balancer_ports" {
+  type        = list(number)
+  description = "ALB External Ports for listenning (list(number))"
+  default = [80]
+}
 
 #######################################
 # VMs RESOURCES
@@ -114,7 +157,7 @@ variable "vms_resources" {
       preemptible   = true
       hdd_size      = 30
       hdd_type      = "network-hdd"
-      enable_nat    = true,
+      enable_nat    = false,
       ip_address    = ""
     },
     "worker" = {
@@ -163,8 +206,27 @@ variable "vms_ssh_user" {
   description = "SSH user"
   default     = "user"
 }
+## ssh nat port for connecting via nat-instance
+variable "vms_ssh_nat_port" {
+  type        = number
+  description = "ssh nat port for connecting via nat-instance (default - 22000)"
+  default     = 22000
+}
 ## ssh root-key
 variable "vms_ssh_root_key" {
   type        = string
   description = "ssh-keygen -t ed25519"
+}
+## ssh private key path
+## (without last '/')
+variable "ssh_private_key_path" {
+  type        = string
+  description = "## ssh private key path (without last '/') (default - './.ssh')"
+  default     = "./.ssh"
+}
+## ssh private key filename
+variable "ssh_private_key_file" {
+  type        = string
+  description = "## ssh private key filename (default - 'id_rsa')"
+  default     = "id_rsa"
 }
