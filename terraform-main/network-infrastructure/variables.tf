@@ -53,9 +53,12 @@ variable "subnet_public_name" {
 }
 ## default PUBLIC net cidr
 variable "subnet_public_cidr" {
-  type        = list(string)
+  type = list(object({
+    zone : string,
+    cidr : list(string)
+  }))
   description = "VPC public cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = ["10.1.1.0/24"]
+  default     = [{ zone : "ru-central1-a", cidr : ["10.1.1.0/24"] }]
 }
 ## default PRIVATE net name
 variable "subnet_private_name" {
@@ -65,9 +68,12 @@ variable "subnet_private_name" {
 }
 ## default PRIVATE net cidr
 variable "subnet_private_cidr" {
-  type        = list(string)
+  type = list(object({
+    zone : string,
+    cidr : list(string)
+  }))
   description = "VPC private cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = ["192.168.1.0/24"]
+  default     = [{ zone : "ru-central1-a", cidr : ["192.168.1.0/24"] }]
 }
 
 #######################################
