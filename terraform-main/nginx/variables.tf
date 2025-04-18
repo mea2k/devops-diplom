@@ -13,6 +13,17 @@ variable "master_ssh" {
 }
 
 #######################################
+# NGINX CONFIG VARS
+#######################################
+## HTTP-порт функционирования NGINX
+## (default - 80)
+variable "nginx_port" {
+  type        = number
+  description = "HTTP-порт функционирования NGINX (default - 80)"
+  default     = 80
+}
+
+#######################################
 # SSH vars
 #######################################
 ## ssh user
