@@ -197,6 +197,11 @@ module "nginx-deploy" {
   ## Master SSH Connect Data list
   master_ssh = module.cluster-infrastructure.master_ssh
 
+
+  ## HTTP-порт функционирования NGINX
+  ## (default - 80)
+  nginx_port = var.nginx_port #8080
+
   ## ssh user
   ## (default - 'user')
   vms_ssh_user = var.vms_ssh_user
@@ -266,6 +271,8 @@ module "kube-nlb" {
   depends_on = [module.cluster-infrastructure]
 }
 
+
+
 #######################################
 # МОДУЛЬ УСТАНОВКИ KUBERNETES
 #######################################
@@ -283,24 +290,26 @@ module "kubernetes-deploy" {
 
   ## Kubespray Ansible inventory relative path and file
   ## (default - './hosts.yml')
-  ansible_host_file = "../ansible/hosts.yml"
+  ansible_host_file = var.ansible_host_file # "../ansible/hosts.yml"
 
   ## Kubernetes internal network for services
   ## (default - '10.233.0.0/18')
-  kube_service_addresses = "10.233.0.0/18"
-
-  ## Core DNS IP
-  ## (must be from kube_service_address network)
-  ## (default - '10.233.0.2')
-  coredns_ip = "10.233.0.2"
+  kube_service_addresses = var.kube_service_addresses
 
   ## internal network. When used, it will assign IP
   ## addresses from this range to individual pods.
   ## (default - '10.233.64.0/18')
-  kube_pods_subnet = "10.233.64.0/18"
+  kube_pods_subnet = var.kube_pods_subnet
+
+  ## Core DNS IP
+  ## (must be from kube_service_address network)
+  ## (default - '10.233.0.2')
+  coredns_ip = var.coredns_ip
 
   ## Virtual IP-address of external Load Balancer
-  loadbalancer_ext_ip = module.kube-nlb.nlb_ext_ip #var.loadbalancer_ext_ip
+  loadbalancer_ext_ip = module.kube-nlb.nlb_info.address #var.loadbalancer_ext_ip
+
+  app_loadbalancer_ext_ip = null
 
   ## Virtual Port of external Load Balancer
   ## (default - 8888)
@@ -313,6 +322,10 @@ module "kubernetes-deploy" {
   ## enables proxy liveness check for nginx
   ## (default - 8081)
   loadbalancer_healthcheck_port = var.loadbalancer_healthcheck_port
+
+  ## Port for metric server
+  ## (default - 10000)
+  metrics_server_container_port = var.metrics_server_container_port
 
   ## Master SSH Connect Data list
   master_ssh = module.cluster-infrastructure.master_ssh
@@ -362,9 +375,24 @@ module "kube-alb" {
   ## List of Public subnets data
   vpc_public_subnets = module.net.public
 
+  public_ip = module.kube-nlb.public_ip.external_ipv4_address[0].address
+
   ## ALB External Ports for listenning (list)
   ## (default - [80])
-  app_balancer_ports = var.app_balancer_ports
+  app_balancer_ports = concat(
+    var.app_balancer_ports,
+    [var.nginx_port],
+    #[for s in range(11001, 11101): s]
+  )
 
-  depends_on = [module.kubernetes-deploy]
+  ## Servers healthcheck URL
+  app_balancer_healthcheck_url = var.app_balancer_healthcheck_url
+
+  ## Servers healthcheck Port
+  app_balancer_healthcheck_port = var.app_balancer_healthcheck_port
+
+  depends_on = [
+    module.cluster-infrastructure,
+    module.kubernetes-deploy
+  ]
 }

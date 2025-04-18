@@ -17,29 +17,17 @@ variable "folder_id" {
 #######################################
 # Yandex.cloud DEFAULTS
 #######################################
-## default network zone (used in yandex_vpc_subnet) - 'ru-central1-a'
-variable "default_zone" {
-  type        = string
-  description = "https://cloud.yandex.ru/docs/overview/concepts/geo-scope"
-  default     = "ru-central1-a"
-}
-## default cidr
-variable "default_cidr" {
-  type        = string
-  description = "https://cloud.yandex.ru/docs/vpc/operations/subnet-create"
-  default     = "10.0.1.0/24"
-}
 ## Number of zones
 variable "vpc_zones_count" {
   type        = number
   description = "Number of zones for cluster"
-  default     = 1
+  #default     = 1
 }
 ## List of zones
 variable "vpc_zones" {
   type        = list(string)
   description = "List of zones (count must be equal to 'var.vpc_zones_count')"
-  default     = ["ru-central1-a"]
+  #default     = ["ru-central1-a"]
 }
 
 #######################################
@@ -49,13 +37,13 @@ variable "vpc_zones" {
 variable "vpc_name" {
   type        = string
   description = "VPC network"
-  default     = "develop"
+  #default     = "develop"
 }
 ## default PUBLIC net name
 variable "subnet_public_name" {
   type        = string
   description = "VPC public subnet name"
-  default     = "public"
+  #default     = "public"
 }
 ## default PUBLIC net cidr
 variable "subnet_public_cidr" {
@@ -64,13 +52,13 @@ variable "subnet_public_cidr" {
     cidr : list(string)
   }))
   description = "VPC public cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = [{ zone : "ru-central1-a", cidr : ["10.1.1.0/24"] }]
+  #default     = [{ zone : "ru-central1-a", cidr : ["10.1.1.0/24"] }]
 }
 ## default PRIVATE net name
 variable "subnet_private_name" {
   type        = string
   description = "VPC private subnet name"
-  default     = "private"
+  #default     = "private"
 }
 ## default PRIVATE net cidr
 variable "subnet_private_cidr" {
@@ -79,12 +67,40 @@ variable "subnet_private_cidr" {
     cidr : list(string)
   }))
   description = "VPC private cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  default     = [{ zone : "ru-central1-a", cidr : ["192.168.1.0/24"] }]
+  #default     = [{ zone : "ru-central1-a", cidr : ["192.168.1.0/24"] }]
 }
 
 #######################################
 # KUBERNETES CONFIG VARS
 #######################################
+## Kubespray Ansible inventory relative path and file
+variable "ansible_host_file" {
+  type        = string
+  description = "Ansible inventory relative path and file"
+}
+
+## Kubernetes internal network for services, unused block of space
+variable "kube_service_addresses" {
+  type        = string
+  description = "Kubernetes internal network for services"
+  #default     = "10.233.0.0/18"
+}
+## internal network. When used, it will assign IP
+## addresses from this range to individual pods.
+variable "kube_pods_subnet" {
+  type        = string
+  description = "internal network. When used, it will assign IP-addresses from this range to individual pods. This network must be unused in your network infrastructure!"
+  #default     = "10.233.64.0/18"
+}
+## Core DNS IP
+## (must be from kube_service_address network)
+## (default - '10.233.0.2')
+variable "coredns_ip" {
+  type        = string
+  description = "Core DNS IP (must be from kube_service_address network)"
+  #default     = "10.233.0.2"
+}
+
 ## Virtual IP for check group
 variable "loadbalancer_ext_ip" {
   type        = string
@@ -95,21 +111,26 @@ variable "loadbalancer_ext_ip" {
 variable "loadbalancer_ext_port" {
   type        = number
   description = "Virtual Port for check group (default - 8888)"
-  default     = 8888
+  #default     = 8888
 }
 ## Inner Port for check group
 variable "loadbalancer_int_port" {
   type        = number
   description = "Inner Port for check group (default - 6443)"
-  default     = 6443
+  #default     = 6443
 }
 ## Proxy liveness healthcheck port (for nginx)
 variable "loadbalancer_healthcheck_port" {
   type        = number
   description = "Proxy liveness healthcheck port (for nginx)"
-  default     = 8081
+  #default     = 8081
 }
-
+## Port for metric server
+variable "metrics_server_container_port" {
+  type        = number
+  description = "Port for metric server"
+  #default     = 10000
+}
 #######################################
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
@@ -117,7 +138,29 @@ variable "loadbalancer_healthcheck_port" {
 variable "app_balancer_ports" {
   type        = list(number)
   description = "ALB External Ports for listenning (list(number))"
-  default = [80]
+  #default = [80]
+}
+
+## ALB healthcheck Port
+variable "app_balancer_healthcheck_port" {
+  type        = string
+  description = "ALB healthcheck Port"
+}
+## ALB healthcheck URL
+variable "app_balancer_healthcheck_url" {
+  type        = string
+  description = "ALB healthcheck URL"
+  #default = "/healthz"
+}
+
+
+
+## HTTP-порт функционирования NGINX
+## (default - 80)
+variable "nginx_port" {
+  type        = number
+  description = "HTTP-порт функционирования NGINX (default - 80)"
+  #default = 80
 }
 
 #######################################
@@ -137,63 +180,6 @@ variable "vms_resources" {
     ip_address : string,
   }))
   description = "{platform_id=<STRING>, cores=<NUMBER>, memory=<NUMBER>, core_fraction=<NUMBER>, vm_db_preemptible: <BOOL>, hdd_size=<NUMBER>, hdd_type=<STRING>, enable_nat: <BOOL>}"
-  default = {
-    "server" = {
-      platform_id   = "standard-v3"
-      cores         = 2
-      memory        = 1
-      core_fraction = 20
-      preemptible   = true
-      hdd_size      = 10
-      hdd_type      = "network-hdd"
-      enable_nat    = true,
-      ip_address    = ""
-    },
-    "master" = {
-      platform_id   = "standard-v3"
-      cores         = 2
-      memory        = 2
-      core_fraction = 20
-      preemptible   = true
-      hdd_size      = 30
-      hdd_type      = "network-hdd"
-      enable_nat    = false,
-      ip_address    = ""
-    },
-    "worker" = {
-      platform_id   = "standard-v3"
-      cores         = 2
-      memory        = 2
-      core_fraction = 20
-      preemptible   = true
-      hdd_size      = 20
-      hdd_type      = "network-hdd"
-      enable_nat    = false,
-      ip_address    = ""
-    },
-    "nat" = {
-      platform_id   = "standard-v3"
-      cores         = 2
-      memory        = 1
-      core_fraction = 20
-      preemptible   = true
-      hdd_size      = 10
-      hdd_type      = "network-hdd"
-      enable_nat    = true
-      ip_address    = ""
-    },
-    "control" = {
-      platform_id   = "standard-v3"
-      cores         = 2
-      memory        = 2
-      core_fraction = 20
-      preemptible   = true
-      hdd_size      = 30
-      hdd_type      = "network-hdd"
-      enable_nat    = true
-      ip_address    = ""
-    },
-  }
 }
 
 
@@ -204,13 +190,13 @@ variable "vms_resources" {
 variable "vms_ssh_user" {
   type        = string
   description = "SSH user"
-  default     = "user"
+  #default     = "user"
 }
 ## ssh nat port for connecting via nat-instance
 variable "vms_ssh_nat_port" {
   type        = number
   description = "ssh nat port for connecting via nat-instance (default - 22000)"
-  default     = 22000
+  #default     = 22000
 }
 ## ssh root-key
 variable "vms_ssh_root_key" {
@@ -222,11 +208,11 @@ variable "vms_ssh_root_key" {
 variable "ssh_private_key_path" {
   type        = string
   description = "## ssh private key path (without last '/') (default - './.ssh')"
-  default     = "./.ssh"
+  #default     = "./.ssh"
 }
 ## ssh private key filename
 variable "ssh_private_key_file" {
   type        = string
   description = "## ssh private key filename (default - 'id_rsa')"
-  default     = "id_rsa"
+  #default     = "id_rsa"
 }

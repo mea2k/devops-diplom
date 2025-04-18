@@ -47,9 +47,9 @@ output "vm_control" {
 
 
 output "nlb" {
-  value = module.kube-nlb.nlb
+  value = module.kube-nlb.nlb_info
 }
 
 output "alb" {
-  value = module.kube-alb.alb
+  value = module.kube-alb.alb_info
 }

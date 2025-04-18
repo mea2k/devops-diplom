@@ -7,7 +7,9 @@ vpc_zones       = ["ru-central1-a", "ru-central1-b", "ru-central1-d"]
 #######################################
 # Yandex.cloud NETWORK VARS
 #######################################
-vpc_name = "diplom"
+vpc_name            = "diplom"
+subnet_public_name  = "public"
+subnet_private_name = "private"
 subnet_public_cidr = [
   {
     zone : "ru-central1-a",
@@ -23,7 +25,7 @@ subnet_public_cidr = [
 subnet_private_cidr = [
   {
     zone : "ru-central1-a",
-    cidr : ["192.168.100.0/24", "192.168.101.0/24"],
+    cidr : ["192.168.101.0/24", "192.168.200.0/24"],
     }, {
     zone : "ru-central1-b",
     cidr : ["192.168.102.0/24"],
@@ -36,15 +38,27 @@ subnet_private_cidr = [
 #######################################
 # KUBERNETES CONFIG VARS
 #######################################
+ansible_host_file      = "../ansible/hosts.yml"
+kube_service_addresses = "10.233.0.0/18"
+kube_pods_subnet       = "10.233.64.0/18"
+coredns_ip             = "10.233.0.10"
+
 loadbalancer_ext_port         = 8888
 loadbalancer_int_port         = 6443
-loadbalancer_healthcheck_port = 8081
+loadbalancer_healthcheck_port = 6443 #8081
+metrics_server_container_port = 9999 #4443
+
+#######################################
+# NGINX CONFIG VARS
+#######################################
+nginx_port = 8080
 
 #######################################
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
-app_balancer_ports = [80, 8080, 8081, 9000, 9001, 10000]
-
+app_balancer_ports            = [80, 9000, 9001, 10000]
+app_balancer_healthcheck_port = 8080
+app_balancer_healthcheck_url  = "/" #"/healthz"
 
 #######################################
 # GENERAL SSH VARS
@@ -75,7 +89,7 @@ vms_resources = {
     memory        = 2
     core_fraction = 20
     preemptible   = true
-    hdd_size      = 20
+    hdd_size      = 50
     hdd_type      = "network-hdd"
     enable_nat    = false,
     ip_address    = ""
