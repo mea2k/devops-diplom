@@ -11,18 +11,6 @@ variable "folder_id" {
 #######################################
 # Yandex.cloud DEFAULTS
 #######################################
-## default network zone (used in yandex_vpc_subnet) - 'ru-central1-a'
-variable "default_zone" {
-  type        = string
-  description = "https://cloud.yandex.ru/docs/overview/concepts/geo-scope"
-  default     = "ru-central1-a"
-}
-## default cidr
-variable "default_cidr" {
-  type        = string
-  description = "https://cloud.yandex.ru/docs/vpc/operations/subnet-create"
-  default     = "10.0.1.0/24"
-}
 ## Number of zones
 variable "vpc_zones_count" {
   type        = number
