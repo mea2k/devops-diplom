@@ -28,13 +28,13 @@ resource "yandex_lb_network_load_balancer" "kube_ext_nlb" {
 
     healthcheck {
       name = "http"
-      http_options {
-        port = var.nlb_healthcheck_port
-        path = var.nlb_healthcheck_url #"/api"
-      }
-      # tcp_options {
-      #   port = 22 #ssh
+      # http_options {
+      #   port = var.nlb_healthcheck_port
+      #   path = var.nlb_healthcheck_url #"/api"
       # }
+      tcp_options {
+        port = var.nlb_healthcheck_port
+      }
     }
   }
 }
