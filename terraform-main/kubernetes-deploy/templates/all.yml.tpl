@@ -6,9 +6,9 @@ bin_dir: /usr/local/bin
 
 ## External LB example config
 ## apiserver_loadbalancer_domain_name: "elb.some.domain"
-#loadbalancer_apiserver:
-#  address: ${loadbalancer_ext_ip}
-#  port: ${loadbalancer_ext_port}
+loadbalancer_apiserver:
+  address: ${loadbalancer_ext_ip}
+  port: ${loadbalancer_ext_port}
 
 ## Internal loadbalancers for apiservers
 # loadbalancer_apiserver_localhost: true
@@ -17,10 +17,10 @@ bin_dir: /usr/local/bin
 
 ## Local loadbalancer should use this port
 ## And must be set port 6443
-loadbalancer_apiserver_port: ${loadbalancer_int_port}
+#loadbalancer_apiserver_port: ${loadbalancer_int_port}
 
 ## If loadbalancer_apiserver_healthcheck_port variable defined, enables proxy liveness check for nginx.
-loadbalancer_apiserver_healthcheck_port: ${loadbalancer_healthcheck_port} #8081
+#loadbalancer_apiserver_healthcheck_port: ${loadbalancer_healthcheck_port} #8081
 
 ## Since workers are included in the no_proxy variable by default, docker engine will be restarted on all nodes (all
 ## pods will restart) when adding or removing workers.  To override this behaviour by only including control plane nodes

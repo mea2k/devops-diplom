@@ -62,11 +62,18 @@ variable "coredns_ip" {
   default     = "10.233.0.2"
 }
 
-## Public(external) IP-address of external Load Balancer
+## Public(external) IP-address of external Network Load Balancer
 variable "loadbalancer_ext_ip" {
   type        = string
-  description = "Virtual IP-address of external Load Balancer. Kubernetes cluster will be availabel on this IP outside"
+  description = "Virtual IP-address of external Network Load Balancer. Kubernetes cluster will be availabel on this IP outside"
 }
+
+## Public(external) IP-address of external Application Load Balancer
+variable "app_loadbalancer_ext_ip" {
+  type        = string
+  description = "Virtual IP-address of external Application Load Balancer. Kubernetes cluster will be availabel on this IP outside"
+}
+
 ## Virtual Port of external Load Balancer
 variable "loadbalancer_ext_port" {
   type        = number
@@ -85,6 +92,12 @@ variable "loadbalancer_healthcheck_port" {
   type        = number
   description = "Proxy liveness healthcheck port (for nginx)"
   default     = 8081
+}
+## Port for metric server
+variable "metrics_server_container_port" {
+  type        = number
+  description = "Port for metric server"
+  default     = 10000
 }
 
 #######################################

@@ -12,7 +12,7 @@ kube_token_dir: "{{ kube_config_dir }}/tokens"
 kube_api_anonymous_auth: true
 
 ## Change this to use another Kubernetes version, e.g. a current beta release
-kube_version: 1.32.2
+kube_version: 1.32.3
 
 # Where the binaries will be downloaded.
 # Note: ensure that you've enough disk space (about 1G)
@@ -209,7 +209,7 @@ kubectl_localhost: false
 
 ## Supplementary addresses that can be added in kubernetes ssl keys.
 ## That can be useful for example to setup a keepalived virtual IP
-supplementary_addresses_in_ssl_keys: [${loadbalancer_ext_ip} ]
+supplementary_addresses_in_ssl_keys: [${loadbalancer_ext_ip}, ${app_loadbalancer_ext_ip} ]
 
 ## Running on top of openstack vms with cinder enabled may lead to unschedulable pods due to NoVolumeZoneConflict restriction in kube-scheduler.
 ## See https://github.com/kubernetes-sigs/kubespray/issues/2141
