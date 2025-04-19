@@ -1,0 +1,67 @@
+stages:
+  - validate
+  - plan
+  - apply
+  - destroy
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+before_script:
+  - |
+    cat <<EOF >> ~/.terraformrc 
+    provider_installation {
+        network_mirror {
+        url = "https://terraform-mirror.yandexcloud.net/"
+        include = ["registry.terraform.io/*/*"]
+      }
+      direct {
+        exclude = ["registry.terraform.io/*/*"]
+      }
+    }
+    EOF
+  - echo $YC_KEY | base64 -d > terraform-main/sa_key.json
+  - echo $YC_BACKEND_CONFIG > /tmp/backend.secret.tfvars
+  - terraform -chdir=terraform-main init -backend-config="access_key=$YC_BUCKET_ACCESS_KEY" -backend-config="secret_key=$YC_BUCKET_SECRET_KEY" -reconfigure
+
+
+cache:
+    paths:
+        - .terraform
+
+variables:
+    YC_SA_KEY_FILE: sa_key.json
+    YC_BACKEND_KEY_FILE: /tmp/backend.secret.tfvars
+
+
+validate:
+  stage: validate
+  script:
+    - terraform -chdir=terraform-main validate
+
+plan:
+  stage: plan
+  script:
+    - terraform -chdir=terraform-main plan --out=tfstate
+  artifacts:
+    paths:
+      - tfstate
+
+apply:
+  stage: apply
+  script:
+    - terraform -chdir=terraform-main apply -auto-approve
+#  when: manual
+  dependencies:
+    - plan
+
+destroy:
+  stage: destroy
+  script:
+    - terraform init 
+    - terraform -chdir=terraform-main destroy -auto-approve
+  when: manual
+  dependencies: 
+    - apply
