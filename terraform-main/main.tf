@@ -381,7 +381,7 @@ module "kube-alb" {
   ## (default - [80])
   app_balancer_ports = concat(
     var.app_balancer_ports,
-    [var.nginx_port],
+    [{ from = var.nginx_port, to = var.nginx_port }],
     #[for s in range(11001, 11101): s]
   )
 

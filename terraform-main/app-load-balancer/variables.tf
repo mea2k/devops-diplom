@@ -39,11 +39,14 @@ variable "vpc_public_subnets" {
   description = "List of Public subnets [{name, zone, cidr, id}]"
 }
 
-## ALB External Ports for listenning (list)
+## ALB External Ports for listenning (list({from, to}))
 variable "app_balancer_ports" {
-  type        = list(number)
-  description = "ALB External Ports for listenning (list(number))"
-  default     = [80]
+  type = list(object({
+    from : number,
+    to : number
+  }))
+  description = "ALB External Ports for listenning (list({from, to}))"
+  default     = [{ from : 8080, to : 8080 }]
 }
 
 ## Servers healthcheck URL

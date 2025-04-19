@@ -134,9 +134,12 @@ variable "metrics_server_container_port" {
 #######################################
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
-## ALB External Ports for listenning (list)
+## ALB External Ports for listenning (list({from,to}))
 variable "app_balancer_ports" {
-  type        = list(number)
+  type = list(object({
+    from : number,
+    to : number
+  }))
   description = "ALB External Ports for listenning (list(number))"
   #default = [80]
 }

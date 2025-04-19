@@ -38,9 +38,9 @@ resource "yandex_alb_backend_group" "backend-group" {
   dynamic "http_backend" {
     for_each = var.app_balancer_ports
     content {
-      name   = "${var.app_balancer_name}-http-backend-${http_backend.value}"
-      weight = 1                  # Вес для балансировки (при наличии нескольких бэкендов)
-      port   = http_backend.value # Порт целевых инстансов
+      name   = "${var.app_balancer_name}-http-backend-${http_backend.value.from}"
+      weight = 1                     # Вес для балансировки (при наличии нескольких бэкендов)
+      port   = http_backend.value.to # Порт целевых инстансов
       # Связь с целевой группой
       target_group_ids = [yandex_alb_target_group.app-balancer-group.id]
       # Конфигурация балансировки нагрузки
@@ -178,7 +178,7 @@ resource "yandex_alb_load_balancer" "app-balancer" {
           address = yandex_vpc_address.public_ip.external_ipv4_address[0].address
         }
       }
-      ports = var.app_balancer_ports
+      ports = [for s in var.app_balancer_ports : s.from]
     }
     http {
       handler {

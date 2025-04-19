@@ -56,7 +56,14 @@ nginx_port = 8080
 #######################################
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
-app_balancer_ports            = [80, 9000, 9001, 10000]
+app_balancer_ports = [
+  { from = 3000, to = 3000 },
+  { from = 9000, to = 9000 },
+  { from = 9001, to = 9001 },
+  { from = 9090, to = 9090 },
+  { from = 10000, to = 10000 },
+  { from = 80, to = 30238 }
+]
 app_balancer_healthcheck_port = 8080
 app_balancer_healthcheck_url  = "/" #"/healthz"
 
