@@ -45,7 +45,7 @@ resource "yandex_alb_backend_group" "backend-group" {
       target_group_ids = [yandex_alb_target_group.app-balancer-group.id]
       # Конфигурация балансировки нагрузки
       load_balancing_config {
-        panic_threshold                = 90            # Порог для перехода в аварийный режим (% недоступных бэкендов)
+        panic_threshold                = 80            # Порог для перехода в аварийный режим (% недоступных бэкендов)
         locality_aware_routing_percent = 70            # Percent of traffic to be sent to the same availability zone. The rest will be equally divided between other zones.
         strict_locality                = false         # If set, will route requests only to the same availability zone. Balancer won't know about endpoints in other zones.
         mode                           = "ROUND_ROBIN" # Load balancing mode for the backend. Possible values: "ROUND_ROBIN", "RANDOM", "LEAST_REQUEST", "MAGLEV_HASH".
