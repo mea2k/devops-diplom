@@ -192,7 +192,6 @@ __Результат:__
       ![Этап Apply](images/terraform-pipeline-apply-01.png)
 
 
-
 ------
 
 ## Полезные дополнительные материалы, которые пригодились для выполнения задания
@@ -215,9 +214,8 @@ __Результат:__
 
 [Atlantis](https://docs.vultr.com/run-terraform-in-automation-with-atlantis)
 
+[https://habr.com/ru/articles/752586/](https://habr.com/ru/articles/752586/)
 
-
-[https://habr.com/ru/articles/752586/] (https://habr.com/ru/articles/752586/)
 ------
 
 # Задание
