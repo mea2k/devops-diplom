@@ -8,6 +8,13 @@ output "terraform_sa" {
   }
 }
 
+output "registry" {
+  value = {
+    id   = yandex_container_registry.registry.id
+    name = yandex_container_registry.registry.name
+  }
+}
+
 output "tfstate_bucket" {
   description = "Object storage for .tfstate"
   value = {

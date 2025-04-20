@@ -60,6 +60,17 @@ variable "terraform_main_secret_vars_filename" {
   description = "Filename of secret vars for main terraform module"
   default     = "backend.secret.tfvars"
 }
+
+#######################################
+# CONTAINER REGISTRY
+#######################################
+# Container Registry name
+variable "registry_name" {
+  type        = string
+  description = "Container Registry name"
+  default     = "registry"
+}
+
 #######################################
 # Yandex.cloud BUCKET
 #######################################

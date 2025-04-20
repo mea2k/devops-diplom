@@ -62,6 +62,16 @@ resource "yandex_resourcemanager_folder_iam_member" "loadBalancerAdmin" {
   member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
 
+
+#######################################
+# CONTAINER REGISTRY
+#######################################
+resource "yandex_container_registry" "registry" {
+  name = var.registry_name
+}
+
+
+
 #######################################
 # BUCKET И КЛЮЧИ ШИФРОВАНИЯ
 #######################################
