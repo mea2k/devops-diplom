@@ -1,0 +1,51 @@
+prometheus:
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: false
+  # prometheusSpec:
+  #   serviceMonitorSelectorNilUsesHelmValues: false
+  #   retention: 10d
+  #   scrapeInterval: 30s
+  #   storageSpec:
+  #     volumeClaimTemplate:
+  #       spec:
+  #         storageClassName: standard
+  #         accessModes: ["ReadWriteOnce"]
+  #         resources:
+  #           requests:
+  #             storage: 10Gi
+
+grafana:
+  enabled: true
+  adminPassword: "admin"
+  service:
+    type: NodePort
+  ingress:
+    enabled: false
+  # sidecar:
+  #   alerts:
+  #     enabled: true
+  #     label: grafana_alert
+  #     labelValue: "1"
+  #   dashboards:
+  #     enabled: true
+  #     label: grafana_dashboard
+  #     labelValue: "1"
+
+alertmanager:
+  enabled: true
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: false
+
+# Включаем exporters (включены по умолчанию, но можно явно указать)
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+
+
