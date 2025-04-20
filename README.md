@@ -217,6 +217,9 @@ __Результат:__
 
 [Atlantis](https://docs.vultr.com/run-terraform-in-automation-with-atlantis)
 
+
+
+[https://habr.com/ru/articles/752586/] (https://habr.com/ru/articles/752586/)
 ------
 
 # Задание
