@@ -3,24 +3,28 @@ prometheus:
     type: LoadBalancer
   ingress:
     enabled: false
-  # prometheusSpec:
-  #   serviceMonitorSelectorNilUsesHelmValues: false
-  #   retention: 10d
-  #   scrapeInterval: 30s
-  #   storageSpec:
-  #     volumeClaimTemplate:
-  #       spec:
-  #         storageClassName: standard
-  #         accessModes: ["ReadWriteOnce"]
-  #         resources:
-  #           requests:
-  #             storage: 10Gi
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    retention: 10d
+    scrapeInterval: 30s
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-storage
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
 
 grafana:
   enabled: true
   adminPassword: "admin"
   service:
     type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: 31000
+
   ingress:
     enabled: false
   # sidecar:

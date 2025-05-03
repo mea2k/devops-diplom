@@ -1,0 +1,43 @@
+# Default values for teamcity.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+server:
+  name: tc-server
+  replicaCount: 1
+  plugins:
+    teamcity-oauth-1.1.6.zip: https://github.com/pwielgolaski/teamcity-oauth/releases/download/teamcity-oauth-1.1.6/teamcity-oauth-1.1.6.zip
+    teamcity-kubernetes-plugin.zip: https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:TeamCityPluginsByJetBrains_TeamCityKubernetesPlugin_Build20172x,tags:release/artifacts/content/teamcity-kubernetes-plugin.zip
+    slackintegration.zip: https://github.com/alexkvak/teamcity-slack/releases/download/v1.1.8/slackIntegration.zip
+  image:
+    repository: jetbrains/teamcity-server
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: teamcity-server
+    type: LoadBalancer
+    servicePort: 9000
+  persistentVolume:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    annotations: {}
+    # If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+    mountPath: /data/teamcity_server/datadir
+    size: 5Gi
+    storageClass: ""
+    subPath: ""
+  resources: {}
+    #limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    #requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+agent:
+  name: tc-agent
+  replicaCount: 3
+  image:
+    repository: jetbrains/teamcity-agent
+    tag: latest
+    pullPolicy: IfNotPresent
