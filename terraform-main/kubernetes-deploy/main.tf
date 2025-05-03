@@ -25,7 +25,7 @@ resource "terraform_data" "prepare_for_install_kubespray" {
 # СОЗДАНИЕ ФАЙЛОВ НАСТРОЕК ИЗ ШАБЛОНОВ
 #######################################
 ## Создание конфигурационных файлов из шаблонов - k8s-cluster.yml
-resource "local_file" "kubespray_config_file_cluster225" {
+resource "local_file" "kubespray_config_file_cluster227" {
   content = templatefile("${path.module}/templates/k8s-cluster.yml.tpl",
     {
       cluster_name            = var.cluster_name           #"cluster.local"
@@ -43,7 +43,7 @@ resource "local_file" "kubespray_config_file_cluster225" {
 }
 
 ## Создание конфигурационных файлов из шаблонов - all.yml
-resource "local_file" "kubespray_config_file_general225" {
+resource "local_file" "kubespray_config_file_general227" {
   content = templatefile("${path.module}/templates/all.yml.tpl",
     {
       loadbalancer_ext_ip           = var.loadbalancer_ext_ip
@@ -58,7 +58,7 @@ resource "local_file" "kubespray_config_file_general225" {
 }
 
 ## Создание конфигурационных файлов из шаблонов - addons.yml
-resource "local_file" "kubespray_config_file_addons225" {
+resource "local_file" "kubespray_config_file_addons227" {
   content = templatefile("${path.module}/templates/addons.yml.tpl",
     {
       loadbalancer_ext_ip           = var.loadbalancer_ext_ip
@@ -74,7 +74,7 @@ resource "local_file" "kubespray_config_file_addons225" {
 # КОПИРОВАНИЕ ФАЙЛ НАСТРОЕК
 #######################################
 ## Копирование HOSTS.yml
-resource "terraform_data" "kubespray_load_hosts225" {
+resource "terraform_data" "kubespray_load_hosts227" {
   ## Копирование файла hosts.yml,
   ## созданного автоматически модулем 'cluster-infrastructure'
   provisioner "file" {
@@ -91,7 +91,7 @@ resource "terraform_data" "kubespray_load_hosts225" {
 }
 
 ## Копирование файлов из шаблонов
-resource "terraform_data" "kubespray_load_config225" {
+resource "terraform_data" "kubespray_load_config227" {
   ## Копирование файла k8s-cluster.yml
   provisioner "file" {
     source      = "${path.module}/kubespray/k8s-cluster.yml"
@@ -126,9 +126,9 @@ resource "terraform_data" "kubespray_load_config225" {
     }
   }
   depends_on = [
-    local_file.kubespray_config_file_cluster225,
-    local_file.kubespray_config_file_general225,
-    local_file.kubespray_config_file_addons225,
+    local_file.kubespray_config_file_cluster227,
+    local_file.kubespray_config_file_general227,
+    local_file.kubespray_config_file_addons227,
   ]
 }
 
@@ -136,7 +136,7 @@ resource "terraform_data" "kubespray_load_config225" {
 # УСТАНОВКА KUBERNETES
 #######################################
 ## Установка Kubernetes
-resource "terraform_data" "kubespray_install_kubernetes225" {
+resource "terraform_data" "kubespray_install_kubernetes227" {
   provisioner "remote-exec" {
     inline = [
       "#!/bin/bash",
@@ -153,8 +153,8 @@ resource "terraform_data" "kubespray_install_kubernetes225" {
     }
   }
   depends_on = [
-    terraform_data.kubespray_load_hosts225,
-    terraform_data.kubespray_load_config225,
+    terraform_data.kubespray_load_hosts227,
+    terraform_data.kubespray_load_config227,
   ]
 }
 
@@ -164,7 +164,7 @@ resource "terraform_data" "kubespray_install_kubernetes225" {
 #######################################
 ## Копирование файла /etc/kubernetes/admin.conf в /temp/config
 ## с любого мастера (Master-1)
-resource "terraform_data" "kubernetes_copy_config225" {
+resource "terraform_data" "kubernetes_copy_config227" {
   provisioner "remote-exec" {
     inline = [
       "#!/bin/bash",
@@ -179,16 +179,16 @@ resource "terraform_data" "kubernetes_copy_config225" {
       port        = var.master_ssh[0].nat_port
     }
   }
-  depends_on = [terraform_data.kubespray_install_kubernetes225]
+  depends_on = [terraform_data.kubespray_install_kubernetes227]
 }
 
 ## Копирование файла /tmp/config
 ## с Master-1
-resource "terraform_data" "kubernetes_copy_config_local225" {
+resource "terraform_data" "kubernetes_copy_config_local227" {
   provisioner "local-exec" {
     # command = "scp -o 'StrictHostKeyChecking=no' -i ${var.ssh_private_key_path}/${var.ssh_private_key_file} -P ${var.master_ssh[0].nat_port} ${var.vms_ssh_user}@${var.master_ssh[0].nat_ip}:/etc/kubernetes/admin.conf ~/.kube/"
-    command = "scp -o 'StrictHostKeyChecking=no' -P ${var.master_ssh[0].nat_port} ${var.vms_ssh_user}@${var.master_ssh[0].nat_ip}:/tmp/config ~/.kube/"
+    command = "mkdir -p ~/.kube && scp -o 'StrictHostKeyChecking=no' -P ${var.master_ssh[0].nat_port} ${var.vms_ssh_user}@${var.master_ssh[0].nat_ip}:/tmp/config ~/.kube/"
   }
 
-  depends_on = [terraform_data.kubernetes_copy_config225]
+  depends_on = [terraform_data.kubernetes_copy_config227]
 }

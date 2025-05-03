@@ -8,6 +8,13 @@ variable "app_balancer_name" {
   default     = "alb"
 }
 
+## Enable logging
+variable "app_balancer_enable_logging" {
+  type        = bool
+  description = "Enable logging (default false)"
+  default     = false
+}
+
 ## VM Master data
 variable "vm_master" {
   type = list(object({

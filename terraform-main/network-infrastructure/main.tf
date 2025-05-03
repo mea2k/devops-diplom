@@ -8,40 +8,41 @@ resource "yandex_vpc_network" "vpc" {
 ## Подсеть PUBLIC
 ## X шт в разных зонах
 resource "yandex_vpc_subnet" "public" {
-  count = length(var.subnet_public_cidr)
+  for_each = {for k, v in var.subnets_data.public: k => v}
 
-  name           = "${var.subnet_public_name}-${var.subnet_public_cidr[count.index].zone}-${count.index + 1}"
-  zone           = var.subnet_public_cidr[count.index].zone
+  name           = "${var.subnets_name.public}-${each.value.zone}-${each.key + 1}"
+  zone           = each.value.zone
   network_id     = yandex_vpc_network.vpc.id
-  v4_cidr_blocks = var.subnet_public_cidr[count.index].cidr
+  v4_cidr_blocks = each.value.cidr
 }
 
 ## Подсеть PRIVATE
 ## X шт в разных зонах
 resource "yandex_vpc_subnet" "private" {
-  count = length(var.subnet_private_cidr)
+  for_each = {for i, v in var.subnets_data.private: i => v}
 
-  name           = "${var.subnet_private_name}-${var.subnet_private_cidr[count.index].zone}-${count.index + 1}"
-  zone           = var.subnet_private_cidr[count.index].zone
+  name           = "${var.subnets_name.private}-${each.value.zone}-${each.key + 1}"
+  zone           = each.value.zone
   network_id     = yandex_vpc_network.vpc.id
-  v4_cidr_blocks = var.subnet_private_cidr[count.index].cidr
-  route_table_id = var.vm_nat_enable == true ? yandex_vpc_route_table.nat_route[count.index].id : null
+  v4_cidr_blocks = each.value.cidr
+  route_table_id = var.vm_nat_enable == true ? local.nat_route_by_zone[each.value.zone].id : null
 }
 
 #######################################
 # NAT - ТАБЛИЦА МАРШРУТИЗАЦИИ
 ####################################### 
 ## Таблица маршрутизации и статический маршрут
-## Всего X таблиц (по 1й на каждую PRIVATE подсеть)
+## Всего X таблиц (по 1й на каждую зону)
 resource "yandex_vpc_route_table" "nat_route" {
-  count = var.vm_nat_enable == true ? length(var.subnet_private_cidr) : 0
+  for_each = var.vm_nat_enable == true ? { for i,v in var.subnets_data.private: i => v} : {}
 
-  name       = "${var.route_table_name}-${var.subnet_private_cidr[count.index].zone}-${count.index + 1}"
+  name       = "${var.route_table_name}-${each.value.zone}-${each.key + 1}"
+  labels      = {"zone": each.value.zone}
   network_id = yandex_vpc_network.vpc.id
 
   static_route {
     destination_prefix = "0.0.0.0/0"
-    next_hop_address   = local.vm_nat_zone[var.subnet_private_cidr[count.index].zone].network_interface[0].ip_address
+    next_hop_address   = local.vm_nat_by_zone[each.value.zone].network_interface[0].ip_address
   }
 }
 
@@ -55,13 +56,14 @@ data "yandex_compute_image" "nat_boot" {
   family = var.vm_nat_os_family
 }
 ## VM-NAT
+## по 1-й на каждую зону
 resource "yandex_compute_instance" "nat_instance" {
-  count = var.vm_nat_enable == true ? length(var.subnet_public_cidr) : 0
+  for_each = var.vm_nat_enable == true ? {for i,v in var.vpc_zones: i => v} : {}
 
-  name        = "${var.vm_nat_name}-${var.subnet_private_cidr[count.index].zone}-${count.index + 1}"
-  hostname    = "${var.vm_nat_name}-${var.subnet_private_cidr[count.index].zone}-${count.index + 1}"
+  name        = "${var.vm_nat_name}-${each.value}-${each.key + 1}"
+  hostname    = "${var.vm_nat_name}-${each.value}-${each.key + 1}"
   platform_id = var.vms_resources["nat"].platform_id
-  zone        = var.subnet_private_cidr[count.index].zone
+  zone        = each.value
   resources {
     cores         = var.vms_resources["nat"].cores
     memory        = var.vms_resources["nat"].memory
@@ -84,7 +86,7 @@ resource "yandex_compute_instance" "nat_instance" {
 
   network_interface {
     index     = 0
-    subnet_id = local.public_net_zone[var.subnet_private_cidr[count.index].zone]
+    subnet_id = local.public_net_by_zone[each.value]
     nat       = var.vms_resources["nat"].enable_nat
   }
 

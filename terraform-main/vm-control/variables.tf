@@ -17,7 +17,6 @@ variable "vm_control_name" {
 variable "vm_control_zone" {
   type        = string
   description = "VM CONTROL zone (default - 'ru-central1-a')"
-  default     = "ru-central1-a"
 }
 ## VM-CONTROL subnet ID
 variable "vm_control_subnet_id" {

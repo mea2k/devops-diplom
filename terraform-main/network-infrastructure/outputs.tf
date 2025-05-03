@@ -25,6 +25,9 @@ output "public_ids" {
     }
   }
 }
+output "public_by_zone" {
+  value = local.public_net_by_zone
+}
 
 output "private" {
   value = [for s in yandex_vpc_subnet.private : {
@@ -61,8 +64,8 @@ output "vm_nat" {
   }]
 }
 
-output "vm_nat_zone" {
-  value = { for k, s in local.vm_nat_zone : k => {
+output "vm_nat_by_zone" {
+  value = { for k, s in local.vm_nat_by_zone : k => {
     name       = s.name,
     zone       = s.zone,
     network_id = s.network_interface[0].subnet_id

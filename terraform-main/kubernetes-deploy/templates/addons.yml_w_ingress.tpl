@@ -67,11 +67,11 @@ gateway_api_enabled: false
 # Nginx ingress controller deployment
 ingress_nginx_enabled: true
 #ingress_nginx_host_network: false	
-#ingress_nginx_service_type: NodePort #LoadBalancer
-#ingress_nginx_service_annotations:
-#  example.io/loadbalancerIPs: ${loadbalancer_ext_ip}
-#ingress_nginx_service_nodeport_http: 30080
-#ingress_nginx_service_nodeport_https: 30081
+ingress_nginx_service_type: NodePort #LoadBalancer
+ingress_nginx_service_annotations:
+  example.io/loadbalancerIPs: ${loadbalancer_ext_ip}
+ingress_nginx_service_nodeport_http: 30080
+ingress_nginx_service_nodeport_https: 30081
 ingress_publish_status_address: ""
 ingress_nginx_nodeselector:
   kubernetes.io/os: "linux"

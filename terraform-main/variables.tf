@@ -17,12 +17,6 @@ variable "folder_id" {
 #######################################
 # Yandex.cloud DEFAULTS
 #######################################
-## Number of zones
-variable "vpc_zones_count" {
-  type        = number
-  description = "Number of zones for cluster"
-  #default     = 1
-}
 ## List of zones
 variable "vpc_zones" {
   type        = list(string)
@@ -39,35 +33,43 @@ variable "vpc_name" {
   description = "VPC network"
   #default     = "develop"
 }
-## default PUBLIC net name
-variable "subnet_public_name" {
-  type        = string
-  description = "VPC public subnet name"
-  #default     = "public"
+## Subnets names
+variable "subnets_name" {
+  type = map(string)
+  description = "Subnets names"
 }
-## default PUBLIC net cidr
-variable "subnet_public_cidr" {
-  type = list(object({
+
+## Subnets data
+variable "subnets_data" {
+  type = map(list(object({
     zone : string,
     cidr : list(string)
-  }))
-  description = "VPC public cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  #default     = [{ zone : "ru-central1-a", cidr : ["10.1.1.0/24"] }]
+  })))
+  description = "Subnets info - map of lists: key - subnets name, value - list of subnets ([{zone,cidr}])"
 }
-## default PRIVATE net name
-variable "subnet_private_name" {
+
+#######################################
+# VM-CONTROL VARS
+#######################################
+## Enable creating VM-CONTROL
+variable "vm_control_enable" {
+  type        = bool
+  description = "Wether to create VM-CONTROL ({true | false}) (default - true)"
+}
+## VM-CONTROL name
+variable "vm_control_name" {
   type        = string
-  description = "VPC private subnet name"
-  #default     = "private"
+  description = "VM-CONTROL name (default - 'vm-control')"
 }
-## default PRIVATE net cidr
-variable "subnet_private_cidr" {
-  type = list(object({
-    zone : string,
-    cidr : list(string)
-  }))
-  description = "VPC private cidr (count must be equal to 'var.vpc_zones_count') (https://cloud.yandex.ru/docs/vpc/operations/subnet-create)"
-  #default     = [{ zone : "ru-central1-a", cidr : ["192.168.1.0/24"] }]
+## VM-CONTROl zone
+variable "vm_control_zone" {
+  type        = string
+  description = "VM CONTROL zone (default - 'ru-central1-a')"
+}
+## VM-CONTROL OS family (used in yandex_compute_image)
+variable "vm_control_os_family" {
+  type        = string
+  description = "OS family for VM_CONTROL ('yc compute image list --folder-id standard-images') (default = 'ubuntu-2404-lts-oslogin')"
 }
 
 #######################################
@@ -131,6 +133,7 @@ variable "metrics_server_container_port" {
   description = "Port for metric server"
   #default     = 10000
 }
+
 #######################################
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
@@ -156,14 +159,22 @@ variable "app_balancer_healthcheck_url" {
   #default = "/healthz"
 }
 
-
-
 ## HTTP-порт функционирования NGINX
 ## (default - 80)
 variable "nginx_port" {
   type        = number
   description = "HTTP-порт функционирования NGINX (default - 80)"
   #default = 80
+}
+
+#######################################
+# CONTAINER REGISTRY
+#######################################
+# Container Registry name
+variable "registry_name" {
+  type        = string
+  description = "Container Registry name"
+  default     = "registry"
 }
 
 #######################################

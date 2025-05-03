@@ -1,39 +1,51 @@
 #######################################
 # Yandex.cloud DEFAULTS
 #######################################
-vpc_zones_count = 3
 vpc_zones       = ["ru-central1-a", "ru-central1-b", "ru-central1-d"]
 
 #######################################
 # Yandex.cloud NETWORK VARS
 #######################################
 vpc_name            = "diplom"
-subnet_public_name  = "public"
-subnet_private_name = "private"
-subnet_public_cidr = [
-  {
-    zone : "ru-central1-a",
-    cidr : ["10.1.1.0/24"]
+subnets_name = {
+  "public": "public",
+  "private": "private"
+}
+subnets_data = {
+  "public" = [
+    {
+      zone : "ru-central1-a",
+      cidr : ["10.1.1.0/24"]
     }, {
-    zone : "ru-central1-b",
-    cidr : ["10.1.2.0/24"]
+      zone : "ru-central1-b",
+      cidr : ["10.1.2.0/24"]
     }, {
-    zone : "ru-central1-d",
-    cidr : ["10.1.3.0/24"]
-  }
-]
-subnet_private_cidr = [
-  {
-    zone : "ru-central1-a",
-    cidr : ["192.168.101.0/24", "192.168.200.0/24"],
+      zone : "ru-central1-d",
+      cidr : ["10.1.3.0/24"]
+    }
+  ],
+  "private" = [
+    {
+      zone : "ru-central1-a",
+      cidr : ["192.168.101.0/24", "192.168.200.0/24"],
     }, {
-    zone : "ru-central1-b",
-    cidr : ["192.168.102.0/24"],
+      zone : "ru-central1-b",
+      cidr : ["192.168.102.0/24"],
     }, {
-    zone : "ru-central1-d",
-    cidr : ["192.168.103.0/24"],
-  }
-]
+      zone : "ru-central1-d",
+      cidr : ["192.168.103.0/24"],
+    }
+  ]
+}
+
+#######################################
+# VM-CONTROL VARS
+#######################################
+## VM-CONTROL name
+vm_control_enable = true
+vm_control_name = "vm-control"
+vm_control_zone = "ru-central1-a"
+vm_control_os_family = "ubuntu-2404-lts-oslogin"
 
 #######################################
 # KUBERNETES CONFIG VARS
@@ -58,14 +70,19 @@ nginx_port = 8080
 #######################################
 app_balancer_ports = [
   { from = 3000, to = 3000 },
-  { from = 9000, to = 9000 },
-  { from = 9001, to = 9001 },
-  { from = 9090, to = 9090 },
-  { from = 10000, to = 10000 },
-  { from = 80, to = 30238 }
+  { from = 9000, to = 31111 },
+  { from = 10100, to = 31100 },  #9100
+  { from = 9090, to = 31090 },
+  { from = 9099, to = 31099 },
+  { from = 80, to = 31000 },
 ]
 app_balancer_healthcheck_port = 8080
 app_balancer_healthcheck_url  = "/" #"/healthz"
+
+#######################################
+# CONTAINER REGISTRY
+#######################################
+registry_name = "devops-registry"
 
 #######################################
 # GENERAL SSH VARS

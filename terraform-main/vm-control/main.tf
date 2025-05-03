@@ -8,6 +8,27 @@ data "yandex_compute_image" "vm_boot" {
   family = var.vm_control_os_family
 }
 
+
+## Создание файла cloud-init из шаблона - 
+## cloud-init/vm-control.yml
+# resource "local_file" "cloud_init_file" {
+#   content = templatefile("${path.module}/templates/vm-control.yml.tpl",
+#     {
+#       ssh_user = var.vms_ssh_user
+#       ssh_root_key = var.vms_ssh_root_key
+#     }
+#   )
+#   filename = "${path.module}/cloud-init/vm-control.yml"
+# }
+
+data "template_file" "cloud_init" {
+  template = "${file("${path.module}/templates/vm-control.yml.tpl")}"
+  vars = {
+    ssh_user = var.vms_ssh_user
+    ssh_root_key = var.vms_ssh_root_key
+  }
+}
+
 ## VM-CONTROL
 resource "yandex_compute_instance" "vm_control" {
   count = var.vm_control_enable == true ? 1 : 0
@@ -41,26 +62,22 @@ resource "yandex_compute_instance" "vm_control" {
     nat       = var.vms_resources["control"].enable_nat
   }
 
-  # metadata = {
-  #   serial-port-enable = local.vms_metadata.serial_port_enable #1
-  #   ssh-keys           = local.vms_metadata.ssh_keys[0]        #"ubuntu:${var.vms_ssh_root_key}"
-  # }
-  metadata = local.vms_metadata_public_image
+  #metadata = local.vms_metadata_public_image
+
+  metadata    = {
+    #user-data = "${file("${path.module}/cloud-init/vm-control.yml")}"
+    "user-data" = "${data.template_file.cloud_init.rendered}"
+  }
+  #depends_on = [ local_file.cloud_init_file ]
 }
 
-#######################################
-# УСТАНОВКА ТРЕБУЕМОГО ПО НА VM-CONTROL
-#######################################
-## Установка необходимых зависимостей
-resource "terraform_data" "install_common" {
+## Ожидание завершения cloud-init
+resource "terraform_data" "cloud_init_wait" {
   count = var.vm_control_enable == true ? 1 : 0
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get -y update",
-      "sudo apt install -y software-properties-common",
-      "sudo apt install -y git git-extras",
-      "sudo apt install -y python3 python3-pip pipx",
+      "cloud-init status --wait"
     ]
     connection {
       type        = "ssh"
@@ -71,42 +88,7 @@ resource "terraform_data" "install_common" {
   }
 }
 
-## Установка ANSIBLE
-resource "terraform_data" "install_ansible" {
-  count = var.vm_control_enable == true ? 1 : 0
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo add-apt-repository --yes --update ppa:ansible/ansible",
-    ]
-    connection {
-      type        = "ssh"
-      host        = yandex_compute_instance.vm_control[0].network_interface[0].nat_ip_address
-      user        = var.vms_ssh_user
-      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
-    }
-  }
-  depends_on = [terraform_data.install_common]
-}
-
-## Установка Kubectl
-resource "terraform_data" "install_kubectl" {
-  count = var.vm_control_enable == true ? 1 : 0
-
-  provisioner "remote-exec" {
-    inline = [
-      "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl",
-      "sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl"
-    ]
-    connection {
-      type        = "ssh"
-      host        = yandex_compute_instance.vm_control[0].network_interface[0].nat_ip_address
-      user        = var.vms_ssh_user
-      private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
-    }
-  }
-  depends_on = [terraform_data.install_ansible]
-}
 
 ## Копирование файлов на VM-CONTROLLER
 resource "terraform_data" "ssh_config" {
@@ -138,5 +120,5 @@ resource "terraform_data" "ssh_config" {
       private_key = file("${var.ssh_private_key_path}/${var.ssh_private_key_file}")
     }
   }
-  depends_on = [terraform_data.install_common]
+  depends_on = [ terraform_data.cloud_init_wait ]
 }

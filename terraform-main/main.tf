@@ -12,23 +12,16 @@ module "net" {
   ## Имя сети
   vpc_name = var.vpc_name
 
-  ## Количество зон
-  ## (default - 1)
-  vpc_zones_count = var.vpc_zones_count # 3
-
   ## Названия зон (количество должно совпадать с vpc_zones_count)
   ## (default - ["ru-central1-a"])
   vpc_zones = var.vpc_zones
 
-  ## Адреса Public-подсетей в привязке к зонам
-  ## (в каждой зоне должно быть не менее одной сети)
-  ## (default - [{zone: "ru-central1-a", cidr: ["10.1.1.0/24"]}])
-  subnet_public_cidr = var.subnet_public_cidr
-
-  ## Адреса Private-подсетей в привязке к зонам
-  ## (в каждой зоне должно быть не менее одной сети)
-  ## (default - [{zone: "ru-central1-a", cidr: ["192.168.1.0/24"]}])
-  subnet_private_cidr = var.subnet_private_cidr
+  ## Subnets names
+  ## (default - {"public": "public", "private": "private"})
+  subnets_name = var.subnets_name
+  ## Subnets data
+  ## (default - {"public":[{zone: "ru-central1-a", cidr: ["10.1.1.0/24"]}]})
+  subnets_data = var.subnets_data
 
   ## Имя статической таблицы маршрутизации
   ## (default - 'nat-instance-route')
@@ -111,7 +104,7 @@ module "cluster-infrastructure" {
 
   ## VM NAT-INSTANCES info (uses in making ssh forwarding, 
   ## gets from module 'network-infrustructure')
-  vm_nat = module.net.vm_nat_zone
+  vm_nat = module.net.vm_nat_by_zone
 
   ## External SSH PORT for VM Masters (start from)
   ## (default - 22000)
@@ -148,22 +141,21 @@ module "vm-control" {
 
   ## Включение создания VM-CONTROL
   ## (default - true)
-  vm_control_enable = true
+  vm_control_enable = var.vm_control_enable
 
   ## VM-CONTROL name
   ## (default - 'vm-control')
-  vm_control_name = "vm-control"
+  vm_control_name = var.vm_control_name
 
   ## VM-CONTROl zone
-  ## (default - 'ru-central1-a')
-  vm_control_zone = "ru-central1-a"
+  vm_control_zone = var.vm_control_zone
 
   ## VM-CONTROL subnet ID
-  vm_control_subnet_id = module.net.public[0].id
+  vm_control_subnet_id = module.net.public_by_zone[var.vm_control_zone]
 
   ## VM-CONTROL OS family (used in yandex_compute_image)
   ## (default - 'ubuntu-2404-lts-oslogin')
-  vm_control_os_family = "ubuntu-2404-lts-oslogin"
+  vm_control_os_family = var.vm_control_os_family
 
   ## VMs resources - use default
   vms_resources = var.vms_resources
@@ -183,7 +175,7 @@ module "vm-control" {
   ## (default - 'id_rsa')
   ssh_private_key_file = var.ssh_private_key_file
 
-  depends_on = [module.cluster-infrastructure]
+  depends_on = [module.net]
 }
 
 #######################################
@@ -271,8 +263,6 @@ module "kube-nlb" {
   depends_on = [module.cluster-infrastructure]
 }
 
-
-
 #######################################
 # МОДУЛЬ УСТАНОВКИ KUBERNETES
 #######################################
@@ -351,7 +341,6 @@ module "kubernetes-deploy" {
   ]
 }
 
-
 #######################################
 # МОДУЛЬ БАЛАНСИРОВЩИКА НАГРУЗКИ 
 # YANDEX APPICATION LOAD BALANCER
@@ -364,6 +353,10 @@ module "kube-alb" {
   ## Имя балансировщика
   ## (default - 'alb')
   app_balancer_name = "kube-alb"
+
+  ## Enable logging
+  ## (default - false)
+  app_balancer_enable_logging = false
 
   ## VM Master Data list 
   ##(list(object({fqdn,id,name,ip,nat_ip,zone,network_id
@@ -396,3 +389,4 @@ module "kube-alb" {
     module.kubernetes-deploy
   ]
 }
+

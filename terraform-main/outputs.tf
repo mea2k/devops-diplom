@@ -45,7 +45,6 @@ output "vm_control" {
   }]
 }
 
-
 output "nlb" {
   value = module.kube-nlb.nlb_info
 }

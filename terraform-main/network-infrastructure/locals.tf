@@ -14,8 +14,9 @@ locals {
     "user-data" : "#cloud-config\nusers:\n  - name: ${var.vms_ssh_user}\n    groups: sudo\n    shell: /bin/bash\n    sudo: 'ALL=(ALL) NOPASSWD:ALL'\n    ssh_authorized_keys:\n      - ${var.vms_ssh_root_key}"
   }
 
-  public_net_zone = { for s in yandex_vpc_subnet.public : s.zone => s.id }
+  public_net_by_zone = { for s in yandex_vpc_subnet.public : s.zone => s.id }
 
-  vm_nat_zone = { for s in yandex_compute_instance.nat_instance : s.zone => s }
+  vm_nat_by_zone = { for s in yandex_compute_instance.nat_instance : s.zone => s }
 
+  nat_route_by_zone = { for s in yandex_vpc_route_table.nat_route : s.labels.zone => s }
 }

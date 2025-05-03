@@ -85,8 +85,8 @@ ingress_nginx_tolerations:
     value: ""
     effect: "NoSchedule"
 ingress_nginx_namespace: "ingress-nginx"
-ingress_nginx_insecure_port: 80
-ingress_nginx_secure_port: 443
+#ingress_nginx_insecure_port: 80
+#ingress_nginx_secure_port: 443
 #ingress_nginx_configmap:
 #  map-hash-bucket-size: "128"
 #  ssl-protocols: "TLSv1.2 TLSv1.3"
@@ -96,7 +96,7 @@ ingress_nginx_secure_port: 443
 #  53: "kube-system/coredns:53"
 #ingress_nginx_extra_args:
 #  - --default-ssl-certificate=default/foo-tls
-ingress_nginx_termination_grace_period_seconds: 300
+#ingress_nginx_termination_grace_period_seconds: 300
 ingress_nginx_class: nginx
 ingress_nginx_without_class: true
 ingress_nginx_default: false
