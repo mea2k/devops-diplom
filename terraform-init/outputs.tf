@@ -28,8 +28,15 @@ output "sa-key" {
   value = {
     id    = yandex_iam_service_account_static_access_key.sa-static-key.id
     sa_id = yandex_iam_service_account_static_access_key.sa-static-key.service_account_id
-    #key_id = yandex_iam_service_account_static_access_key.sa-static-key.key_id
-    #public_key = yandex_iam_service_account_static_access_key.sa-static-key.public_key 
-    #private_key = yandex_iam_service_account_static_access_key.sa-static-key.private_key 
   }
+}
+
+output "sa-key_secret" {
+  value = {
+    id    = yandex_iam_service_account_static_access_key.sa-static-key.id
+    sa_id = yandex_iam_service_account_static_access_key.sa-static-key.service_account_id
+    access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key 
+    secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key 
+  }
+  sensitive = true
 }

@@ -62,15 +62,12 @@ resource "yandex_resourcemanager_folder_iam_member" "loadBalancerAdmin" {
   member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
 
-
 #######################################
 # CONTAINER REGISTRY
 #######################################
 resource "yandex_container_registry" "registry" {
   name = var.registry_name
 }
-
-
 
 #######################################
 # BUCKET И КЛЮЧИ ШИФРОВАНИЯ
@@ -122,11 +119,6 @@ resource "yandex_storage_bucket" "tfstate-bucket" {
   }
   # удаляем, даже если не пустой
   force_destroy = true
-
-  # зависимости
-  depends_on = [
-    yandex_resourcemanager_folder_iam_member.storage-admin
-  ]
 }
 
 #######################################
@@ -149,12 +141,6 @@ resource "local_file" "vars" {
     }
   )
   filename = "${var.terraform_main_path}${var.terraform_main_secret_vars_filename}"
-  # зависимости
-  depends_on = [
-    yandex_resourcemanager_folder_iam_member.storage-admin,
-    yandex_iam_service_account_static_access_key.sa-static-key,
-    yandex_storage_bucket.tfstate-bucket
-  ]
 }
 
 ## Создаем файл backend.tf
