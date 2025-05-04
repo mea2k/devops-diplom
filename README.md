@@ -47,26 +47,25 @@ __Балансировщик уровня приложения (ALB)__
 
     3. Выполнить команду запуска
 
-      ```
+      ```shell
         terraform -chdir=./terraform-init apply -var-file=../secret.auto.tfvars
-
       ```
 
 4. Получение файла с ключами от созданного в п.3 сервисного аккаунта
 
-    ```
+    ```shell
     yc iam key create --output terraform-main/sa_key.json --service-account-name=terraform-sa --folder-id=<folder-id>
     ```
 
 5. Инициализация основного проекта terraform (добавление учетных данных созданного сервисного аккаунт, и настройка хранения файла состояния .tfstate в объектном хранилище Яндекс Облака)
 
-    ```
+    ```shell
     terraform -chdir=./terraform-main init -backend-config=backend.secret.tfvars -reconfigure
     ```
 
 6. Запуск создания основной инфраструктуры
 
-    ```
+    ```shell
     terraform -chdir=./terraform-main apply -var-file=../secret.auto.tfvars
     ```
 
@@ -74,13 +73,13 @@ __Балансировщик уровня приложения (ALB)__
 
 7. Изменение конфигурационного файла кластера по пути `~/.kube/config` - файл создаётся автоматически
 
-    ```
+    ```shell
     nano ~/.kube/config
     ```
 
     В файле необходимо заменить IP-адрес подключения на внешний IP-адрес балансировщика нагрузки и порт подключения на внешний порт. информация отображается в выходных данных terraform-main
 
-    ```
+    ```text
     nlb = {
       "address" = "<external-control-IP>"
       "ext_port" = 8888
@@ -91,7 +90,7 @@ __Балансировщик уровня приложения (ALB)__
 
 8. Проверка работы кластера
 
-    ```
+    ```shell
     kubectl get nodes
     ```
 
@@ -101,7 +100,7 @@ __Балансировщик уровня приложения (ALB)__
 
 9. Проверка корректности работы балансировщика - обращение по внешнему IP-адресу по пути `/` на порт `8080` несколько раз. IP=адрес доступен в выходных данных terraform-main
 
-    ```
+    ```text
     alb = {
       "address" = "<external-app-IP>"
       "name" = "kube-alb"
@@ -135,7 +134,7 @@ __Результат:__
 
 Для запуска проекта необходимо выполнить команды:
 
-```
+```shell
 terraform -chdir=./terraform-apps init
 terraform -chdir=./terraform-apps apply -var-file=../secret.auto.tfvars
 ```
@@ -214,7 +213,7 @@ __Результат:__
 
 - Yandex.Registry - [Yandex.Registry](https://console.yandex.cloud/folders/b1gsts59vmstq2dmi9c9/container-registry/registries/crpg9ie34hq65l49usj2/overview/devops-html/image), сам образ доступен по имени: `yandex/crpg9ie34hq65l49usj2/devops-html`
 
-- dockerhub-репозитории - [makevg/devops-html](https://hub.docker.com/r/makevg/devops-html), сам образ доступен по имени: `makevg/devops-html`
+- dockerhub-репозитории - [makevg/devops-html](https://hub.docker.com/r/makevg/devops-html/tags), сам образ доступен по имени: `makevg/devops-html`
 
 В репозитории содержатся файлы для развёртывания приложения в кластере:
 
@@ -241,7 +240,7 @@ __Результат:__
 
 1. Импорт проекта из github.
 
-2. Создание и заполнение файла [.gitlab-ci.yml](https://github.com/mea2k/simple-html/.gitlab-ci.yml) для приложения:
+2. Создание и заполнение файла [.gitlab-ci.yml](https://github.com/mea2k/simple-html/blob/main/.gitlab-ci.yml) для приложения:
 
     - описание этапов обработки: `build`, `deploy`
 
