@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teamcity-agent
+  namespace: devops-tools
+spec:
+  replicas: 3  # Количество агентов
+  selector:
+    matchLabels:
+      app: teamcity-agent
+  template:
+    metadata:
+      labels:
+        app: teamcity-agent
+    spec:
+      containers:
+      - name: teamcity-agent
+        image: jetbrains/teamcity-agent:latest
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        env:
+        - name: SERVER_URL
+          value: "http://teamcity.devops-tools.svc.cluster.local:31111"
+        - name: AGENT_NAME
+          valueFrom:  # Генерация уникального имени
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: agent-work
+          mountPath: /opt/buildagent/work
+        - name: agent-temp
+          mountPath: /opt/buildagent/temp
+      volumes:
+      - name: agent-work
+        emptyDir: {}
+      - name: agent-temp
+        emptyDir: {}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: teamcity-agent
+  name: teamcity-agent
+  namespace: devops-tools
+spec:
+  type: ClusterIP
+  ports:
+  - name: tcp-9090-9090
+    port: 8888
+    #nodePort: 0
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: teamcity-agent
+
+
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   labels:
+#     app: tc-agent
+#   name: tc-agent
+# spec:
+#   replicas: 3
+#   revisionHistoryLimit: 2 #      , set to 0 All history records that deploy the deployment, can't roll back
+#   strategy:
+#     type: "RollingUpdate"
+#     rollingUpdate: # Scrolling Update Configuration
+#       maxSurge: 1
+#       maxUnavailable: 0
+#   selector:
+#     matchLabels:
+#       app: tc-agent
+#   template:
+#     metadata:
+#       labels:
+#         app: tc-agent
+#     spec:
+#       containers:
+#       - env:
+#         - name: agent_name # Agent Name
+#           value: Agent1
+#         # - Name: Server_URL # server access address
+#         #   value: http://172.16.2.202:30001
+#         - name: DOCKER_IN_DOCKER
+#           value: start
+#         image: jetbrains/teamcity-agent
+#         imagePullPolicy: Always
+#         name: tc-agent
+#         securityContext:
+#           privileged: true  #        
+#         volumeMounts:
+#         - mountPath: /data/teamcity_agent/conf
+#           name: vol
+#         - mountPath: /var/lib/docker
+#           name: vol
+#       dnsPolicy: ClusterFirst
+#       #nodeName: worker-1 # forced constraint to schedule POD to the specified NODE node
+#       restartPolicy: Always
+#       terminationGracePeriodSeconds: 30
+#       volumes:
+#       - name: vol
+#         emptyDir: {} # Temporary Directory
+#       hostNetwork: true

@@ -1,0 +1,31 @@
+---
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: teamcity-pv
+spec:
+  storageClassName: standard-root
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain  # Что делать с PV после удаления PVC (Retain/Delete/Recycle)
+  hostPath:
+    path: /mnt/data/teamcity
+    type: DirectoryOrCreate
+
+---
+#PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: teamcity-pvc
+  namespace: devops-tools
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard-root
+  resources:
+    requests:
+      storage: 30Gi  # Минимум 50 ГБ (TeamCity рекомендует 100+ ГБ для production)

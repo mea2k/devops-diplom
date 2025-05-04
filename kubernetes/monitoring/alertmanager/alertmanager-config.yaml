@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: "5m"
+      smtp_smarthost: "smtp.example.org:587"
+      smtp_from: "alert-manager@cluster.local"
+    route:
+      group_by: ["alertname", "cluster"]
+      group_wait: "30s"
+      group_interval: "5m"
+      repeat_interval: "1h"
+      #receiver: "web.hook"
+      receiver: "email-team"
+      routes:
+      - match:
+          severity: "critical"
+        receiver: "email-critical"
+    receivers:
+    - name: 'web.hook'
+      webhook_configs:
+      - url: 'http://example.com/webhook'
+
+    - name: "email-team"
+      email_configs:
+      - to: "team@example.com"
+        send_resolved: true
+    
+    - name: "email-critical"
+      email_configs:
+      - to: "critical-team@example.com"
+        send_resolved: true
+
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'dev', 'instance']

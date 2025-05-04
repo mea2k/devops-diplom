@@ -1,0 +1,35 @@
+# grafana-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: grafana-pv
+  namespace: monitoring
+  labels:
+    type: local
+    app: grafana
+spec:
+  storageClassName: standard-nobody
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain  # Что делать с PV после удаления PVC (Retain/Delete/Recycle)
+  hostPath:
+    path: "/mnt/data/grafana"
+    type: DirectoryOrCreate
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: monitoring
+spec:
+  storageClassName: standard-nobody
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: grafana-pv

@@ -1,0 +1,36 @@
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: prometheus-pv
+  labels:
+    type: local
+    app: prometheus
+spec:
+  storageClassName: standard-nobody
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain  # Что делать с PV после удаления PVC (Retain/Delete/Recycle)
+  hostPath:
+    path: "/mnt/data/prometheus"
+    type: DirectoryOrCreate
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: prometheus-pvc
+  namespace: monitoring
+  labels:
+    type: local
+    app: prometheus
+spec:
+  storageClassName: standard-nobody
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: prometheus-pv

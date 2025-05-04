@@ -1,0 +1,23 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+
+---
+# Storage class - standard-nobody
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-nobody
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner # indicates that this StorageClass does not support automatic provisioning                    
+volumeBindingMode: Immediate  # or WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+mountOptions:
+- uid=65534
+- gid=65534
+- mode=0777

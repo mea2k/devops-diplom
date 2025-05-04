@@ -1,0 +1,75 @@
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teamcity
+  namespace: devops-tools
+spec:
+  replicas: 1
+  # strategy:
+  #   type: RollingUpdate
+  #   rollingUpdate:
+  #     maxSurge: 1
+  #     maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: teamcity
+  template:
+    metadata:
+      labels:
+        app: teamcity
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: ["teamcity"]
+            topologyKey: "kubernetes.io/hostname"
+
+      containers:
+      - name: teamcity
+        image: jetbrains/teamcity-server:latest  # Можно указать конкретную версию (например, 2023.11)
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        ports:
+        - containerPort: 8111
+        env:
+        - name: TEAMCITY_SERVER_MEM_OPTS
+          value: "-Xmx2g -XX:MaxPermSize=1g"  # Настройки памяти (JVM)
+        volumeMounts:
+        - name: teamcity-data
+          mountPath: /data/teamcity_server/datadir
+        - name: log-vol
+          mountPath: /opt/teamcity/logs
+      volumes:
+      - name: teamcity-data
+        persistentVolumeClaim:
+          claimName: teamcity-pvc
+      - name: log-vol
+        emptyDir: {} # Temporary Directory
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: teamcity
+  namespace: devops-tools
+spec:
+  selector:
+    app: teamcity
+  ports:
+    - protocol: TCP
+      port: 9000
+      nodePort: 31111
+      targetPort: 8111
+  type: NodePort  #LoadBalancer  # Или NodePort, если нет облачного балансировщика

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  replicas: 3  # Нечётное число для кворума
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Гарантия нулевого даунтайма
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: ["alertmanager"]
+              topologyKey: "kubernetes.io/hostname"  # Разные ноды
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest #v0.26.0
+        args:
+        - "--config.file=/etc/alertmanager/alertmanager.yml"
+        - "--storage.path=/alertmanager"
+        - "--web.listen-address=:9098"
+        - "--cluster.listen-address=0.0.0.0:9098"
+        - "--cluster.peer=alertmanager-headless.monitoring.svc.cluster.local:9098"  # Автообнаружение через DNS
+
+        ports:
+        - containerPort: 9099
+          name: http
+        - containerPort: 9098
+          name: cluster  # Для межрепличного общения
+        
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: storage-volume
+          mountPath: /alertmanager
+      
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager-config
+      - name: storage-volume
+        emptyDir: {}
+
+---
+# Headless service for replicas interconnection
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-headless
+  namespace: monitoring
+spec:
+  clusterIP: None  # Headless-режим
+  ports:
+  - name: cluster
+    port: 9098
+    targetPort: 9098
+  selector:
+    app: alertmanager
+
+---
+# Для доступа извне
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  type: NodePort
+  ports:
+  - port: 9099
+    nodePort: 31099
+    targetPort: 9099
+  selector:
+    app: alertmanager

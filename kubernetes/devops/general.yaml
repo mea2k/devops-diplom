@@ -1,0 +1,21 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops-tools
+
+---
+# Storage class - standard
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-root
+provisioner: kubernetes.io/no-provisioner # indicates that this StorageClass does not support automatic provisioning                    
+volumeBindingMode: Immediate  # or WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+mountOptions:
+- uid=1000
+- gid=1000
+- mode=0777
