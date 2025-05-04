@@ -215,11 +215,11 @@ __Результат:__
 
 - dockerhub-репозитории - [makevg/devops-html](https://hub.docker.com/r/makevg/devops-html/tags), сам образ доступен по имени: `makevg/devops-html`
 
-В репозитории содержатся файлы для развёртывания приложения в кластере:
+В репозитории содержатся файлы для развёртывания приложения в кластере ([simple-html/kubernetes](https://github.com/mea2k/simple-html/tree/main/kubernetes)):
 
-- [configMap](https://github.com/mea2k/simple-html/kubernetes/configmap.yaml)
-- [deployment](https://github.com/mea2k/simple-html/kubernetes/deployment.yaml)
-- [service](https://github.com/mea2k/simple-html/kubernetes/service.yaml)
+- [configMap](https://github.com/mea2k/simple-html/blob/main/kubernetes/configmap.yaml)
+- [deployment](https://github.com/mea2k/simple-html/blob/main/kubernetes/deployment.yaml)
+- [service](https://github.com/mea2k/simple-html/blob/main/kubernetes/service.yaml)
 
   По умолчанию, контейнер запускается на порту `80`.
 
