@@ -69,7 +69,7 @@ nginx_port = 8080
 # YANDEX APPLICATION LOAD BALANCER (ALB)
 #######################################
 app_balancer_ports = [
-  { from = 3000, to = 3000 },
+  { from = 3000, to = 31300 },
   { from = 9000, to = 31111 },
   { from = 10100, to = 31100 },  #9100
   { from = 9090, to = 31090 },
@@ -109,11 +109,11 @@ vms_resources = {
   },
   "worker" = {
     platform_id   = "standard-v3"
-    cores         = 2
-    memory        = 2
+    cores         = 4
+    memory        = 4
     core_fraction = 20
     preemptible   = true
-    hdd_size      = 50
+    hdd_size      = 60
     hdd_type      = "network-hdd"
     enable_nat    = false,
     ip_address    = ""
