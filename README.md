@@ -28,6 +28,11 @@ __Схема сети от Яндекса__
 
 ![Схема сети](images/stand-yandex.png)
 
+__Балансировщик уровня приложения (ALB)__
+
+![Структура ALB](images/alb-01.png)
+
+
 ## 2. Подготовка инфраструктуры terraform
 
 1. Создание каталога в Яндекс.Облаке (значение `folder_id`)
@@ -135,6 +140,12 @@ terraform -chdir=./terraform-apps init
 terraform -chdir=./terraform-apps apply -var-file=../secret.auto.tfvars
 ```
 
+### Альтернативный вариант
+
+Подготовлены файлы для ручной настройки `Prometheus`, `Grafana`, `NodeExplorer`, `AlertManager`, `Teamcity`.
+
+Файлы находятся в папке [kubernetes](kubernetes/). Там же есть инструкция ([readme](kubernetes/readme.md)).
+
 __Результат:__
 
 Созданное пространство имен `namespace`, в котором развернуты поды и службы Prometheus.
@@ -153,9 +164,13 @@ __Результат:__
 
 ## 3. Настройка CI/CD terraform-проекта
 
+### Gitlab
+
 Для настройки CI/CD была подготовлена виртуальная машина с установленным Gitlab, куда был импортирован текущий проект из github.
 
-### Настройка pipeline
+Доступ к gitlab: [http://158.160.38.199](http://158.160.38.199) (`root:qwe123!@#`)
+
+### Pipeline
 
 1. Импорт проекта из github.
 
@@ -191,6 +206,108 @@ __Результат:__
 
       ![Этап Apply](images/terraform-pipeline-apply-01.png)
 
+## Тестовое приложение
+
+Разработано web-прилжение __"DevOps-HTML"__ - [https://github.com/mea2k/simple-html](https://github.com/mea2k/simple-html)
+
+Собранный docker-образ размещён в
+
+- Yandex.Registry - [Yandex.Registry](https://console.yandex.cloud/folders/b1gsts59vmstq2dmi9c9/container-registry/registries/crpg9ie34hq65l49usj2/overview/devops-html/image), сам образ доступен по имени: `yandex/crpg9ie34hq65l49usj2/devops-html`
+
+- dockerhub-репозитории - [makevg/devops-html](https://hub.docker.com/r/makevg/devops-html), сам образ доступен по имени: `makevg/devops-html`
+
+В репозитории содержатся файлы для развёртывания приложения в кластере:
+
+- [configMap](https://github.com/mea2k/simple-html/kubernetes/configmap.yaml)
+- [deployment](https://github.com/mea2k/simple-html/kubernetes/deployment.yaml)
+- [service](https://github.com/mea2k/simple-html/kubernetes/service.yaml)
+
+  По умолчанию, контейнер запускается на порту `80`.
+
+## CI/CD тестового приложения
+
+### Приложение
+
+Для автоматического развертывания подготовлено web-приложение `devops-html`. Репозиторий проекта: [https://github.com/mea2k/simple-html](https://github.com/mea2k/simple-html).
+
+### Gitlab
+
+Для настройки CI/CD была подготовлена виртуальная машина с установленным Gitlab, куда был импортирован проект приложения из github.
+
+Доступ к gitlab: [http://158.160.38.199](http://158.160.38.199) (`root:qwe123!@#`)
+
+
+### Pipeline
+
+1. Импорт проекта из github.
+
+2. Создание и заполнение файла [.gitlab-ci.yml](https://github.com/mea2k/simple-html/.gitlab-ci.yml) для приложения:
+
+    - описание этапов обработки: `build`, `deploy`
+
+    - описание обработчиков каждого этапа с вызовом `gitlab-runner`-а и команд `kubectl ...`
+
+3. Добавление необходимых переменных, содержащих конфигурационный файл подключения к кластеру, а также другие переменные для работы с Yandex.Registry:
+
+    - `CI_REGISTRY` - идентификатор созданного Yandex.Registry
+
+    - `CI_REGISTRY_KEY` - данные сервисного аккаунта для доступа к Yandex.Registry (это содержимое файла `sa_key.json`, полученного при выполнении проекта [terraform-init](terraform-init/))
+    
+    - `KUBE_CONFIG` - содержимое конфигурационного файла для подключения к kubernetes-кластеру (создан после выполнения проекта [terraform-main](terraform-main/))
+
+    - `YR_EMAIL` - yandex-email учетной записи, в которой создан Yandex.Registry
+
+    - `YR_OAUTH_TOKEN` - токен подключения к Yandex.Registry ([https://oauth.yandex.ru/verification_code](https://oauth.yandex.ru/verification_code))
+    
+    ![Добавленные переменные окружения в PIpeline](images/cicd-variables.png)
+
+4. Установка `gitlab-runner` типа `docker` для осуществления сборки и размещения образа в кластере. Сделано это на локальной ВМ.
+
+    ![Обработчики процессов CI/CD](images/cicd-runners.png)
+
+5. Добавление коммита и отслеживание хода выполнения pipeline
+
+    ![Результат выполнения pipeline](images/cicd-pipeline-01.png)
+
+    - этап `build`
+
+      ![Этап build](images/cicd-stages-build-01.png)
+
+    - этап `deploy`
+
+      ![Этап Deploy](images/cicd-stages-deploy-01.png)
+
+6. Результат развертывания в кластере
+
+    - добавленный образ в Yandex.Registry
+
+      ![Добавленный образ в Yandex.Registry](images/yandex-registry.png)
+
+    - результат развертывания в кластере
+    
+      ![Результат развертывания в кластере](images/cicd-result-01.png)
+
+    - доступ к самому приложению, запущенному в кластере
+
+      ![Открытое приложение в кластере](images/html-app.png)
+
+
+## Доступные ресурсы кластера
+
+На текущий момент доступны следующие ресурсы кластера
+
+- [http://89.169.150.56/](http://89.169.150.56/) - Grafana
+
+- [http://89.169.150.56:9090](http://89.169.150.56:9090) - Prometheus
+
+- [http://89.169.150.56:9099/](http://89.169.150.56:9099/) - AlertManager
+
+- [http://89.169.150.56:9000/](http://89.169.150.56:9000/) - Teamcity
+
+- [http://89.169.150.56:3000/](http://89.169.150.56:3000/) - web-приложение __"DevOps-html"__
+
+
+
 
 ------
 
@@ -215,6 +332,10 @@ __Результат:__
 [Atlantis](https://docs.vultr.com/run-terraform-in-automation-with-atlantis)
 
 [https://habr.com/ru/articles/752586/](https://habr.com/ru/articles/752586/)
+
+[Хранение docker-образов в Yandex Container Registry](https://yandex.cloud/ru/docs/managed-gitlab/tutorials/image-storage)
+
+[https://dzen.ru/a/XPaLoluskQCw1AgU](https://dzen.ru/a/XPaLoluskQCw1AgU)
 
 ------
 
