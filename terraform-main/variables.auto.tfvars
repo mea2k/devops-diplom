@@ -58,7 +58,7 @@ coredns_ip             = "10.233.0.10"
 loadbalancer_ext_port         = 8888
 loadbalancer_int_port         = 6443
 loadbalancer_healthcheck_port = 6443 #8081
-metrics_server_container_port = 9999 #4443
+metrics_server_container_port = 4443 #(default - 4443)
 
 #######################################
 # NGINX CONFIG VARS
@@ -99,7 +99,7 @@ vms_resources = {
   "master" = {
     platform_id   = "standard-v3"
     cores         = 2
-    memory        = 2
+    memory        = 4
     core_fraction = 20
     preemptible   = true
     hdd_size      = 50
