@@ -311,29 +311,41 @@ __Результат:__
 
 ## Полезные дополнительные материалы, которые пригодились для выполнения задания
 
-[Установка kubernetes через kubespray - habr](https://habr.com/ru/articles/426959/)
+1. Yandex Cloud resources
 
-[https://dev.to/admantium/kubernetes-installation-tutorial-kubespray-46ek?ysclid=m97m4b14sh390719292](https://dev.to/admantium/kubernetes-installation-tutorial-kubespray-46ek?ysclid=m97m4b14sh390719292)
+    - [Шифрование бакета - Yandex.Cloud](https://yandex.cloud/ru/docs/storage/operations/buckets/encrypt)
 
-[https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec](https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec)
+    - [Yandex Storage Bucket](https://terraform-provider.yandexcloud.net/resources/storage_bucket#nestedblock--lifecycle_rule--transition)
 
-[https://habr.com/ru/articles/725640/](https://habr.com/ru/articles/725640/)
+    - [Хранение docker-образов в Yandex Container Registry](https://yandex.cloud/ru/docs/managed-gitlab/tutorials/image-storage)
 
-[Шифрование бакета - Yandex.Cloud](https://yandex.cloud/ru/docs/storage/operations/buckets/encrypt)
 
-[Yandex Storage Bucket](https://terraform-provider.yandexcloud.net/resources/storage_bucket#nestedblock--lifecycle_rule--transition)
+2. Terraform
 
-[https://fauzislami.github.io/blog/2021/10/17/highly-available-kubernetes-cluster-with-haproxy-and-keepalived/](https://fauzislami.github.io/blog/2021/10/17/highly-available-kubernetes-cluster-with-haproxy-and-keepalived/)
+    - [remote-exec Provisioner - developer.hashicorp.com](https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec)
 
-[https://fauzislami.github.io/blog/2021/10/17/highly-available-kubernetes-cluster-with-haproxy-and-keepalived/](https://fauzislami.github.io/blog/2021/10/17/highly-available-kubernetes-cluster-with-haproxy-and-keepalived/)
+3. Kubernetes, kubespray
 
-[Atlantis](https://docs.vultr.com/run-terraform-in-automation-with-atlantis)
+    - [Гайд для новичков по установке Kubernetes (версия 03.2025) - habr](https://habr.com/ru/articles/725640/)
 
-[https://habr.com/ru/articles/752586/](https://habr.com/ru/articles/752586/)
+    - [Установка kubernetes через kubespray - habr](https://habr.com/ru/articles/426959/)
 
-[Хранение docker-образов в Yandex Container Registry](https://yandex.cloud/ru/docs/managed-gitlab/tutorials/image-storage)
+    - [Kubernetes Installation Tutorial: Kubespray - dev.to](https://dev.to/admantium/kubernetes-installation-tutorial-kubespray-46ek?ysclid=m97m4b14sh390719292)
 
-[https://dzen.ru/a/XPaLoluskQCw1AgU](https://dzen.ru/a/XPaLoluskQCw1AgU)
+4. High Availability cluster (HA)
+
+    - [HA Kubernetes Cluster Using HAproxy and Keepalived - fauzislami.github.io](https://fauzislami.github.io/blog/2021/10/17/highly-available-kubernetes-cluster-with-haproxy-and-keepalived/)
+
+5. CI/CD utils
+
+    - [Atlantis](https://docs.vultr.com/run-terraform-in-automation-with-atlantis)
+
+6. Deploying apps in kubernetes
+
+    - [Разворачиваем веб-приложение в Kubernetes с нуля - habr](https://habr.com/ru/articles/752586/)
+
+    - [Используем докер реестр от Яндекс.Облака в Kubernetes - dzen.ru](https://dzen.ru/a/XPaLoluskQCw1AgU)
+
 
 ------
 
